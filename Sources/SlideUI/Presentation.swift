@@ -8,8 +8,8 @@ extension CGVector: Hashable {
     }
 }
 
-enum Focus: Hashable {
-    struct Properties: Hashable {
+public enum Focus: Hashable {
+    public struct Properties: Hashable {
         let uuid: UUID = UUID()
         var offset: CGVector
         var scale: CGFloat
@@ -19,7 +19,7 @@ enum Focus: Hashable {
     case slides([any Slide.Type])
     case properties(Properties)
 
-    static func == (lhs: Focus, rhs: Focus) -> Bool {
+    public static func == (lhs: Focus, rhs: Focus) -> Bool {
         switch (lhs, rhs) {
         case let (.slides(lCont), .slides(rCont)):
             return lCont.map { $0.name } == rCont.map { $0.name }
@@ -41,7 +41,7 @@ enum Focus: Hashable {
     }
 }
 
-struct Camera: Equatable {
+public struct Camera: Equatable {
     var offset: CGVector
     var scale: CGFloat
 }

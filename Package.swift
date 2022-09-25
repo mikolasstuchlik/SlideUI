@@ -16,8 +16,8 @@ let package = Package(
     ],
     targets: [
         .executableTarget(name: "DemoSlideUI", dependencies: []),
-        .target(name: "SlideUI", dependencies: ["SlideUICommons"]),
         .target(name: "SlideUIViews", dependencies: ["CodeEditor", "SlideUICommons", "SlideUI"]),
+        .target(name: "SlideUI", dependencies: ["SlideUICommons"]),
         .target(name: "SlideUICommons")
     ]
 )

@@ -1,4 +1,5 @@
 import SwiftUI
+import SlideUI
 
 public struct ToggleView<C: View>: View {
     @EnvironmentObject public var presentation: PresentationProperties

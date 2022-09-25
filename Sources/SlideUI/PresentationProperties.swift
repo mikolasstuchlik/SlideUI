@@ -1,8 +1,8 @@
 import SwiftUI
 import SlideUICommons
 
-final class PresentationProperties: ObservableObject {
-    enum Mode: Int, Equatable {
+public final class PresentationProperties: ObservableObject {
+    public enum Mode: Int, Equatable {
         case entry, presentation, editor
 
         private static let navigationHotkeys = [
@@ -36,11 +36,11 @@ final class PresentationProperties: ObservableObject {
         }
     }
 
-    static func preview() -> PresentationProperties {
+    public static func preview() -> PresentationProperties {
         PresentationProperties(rootPath: "", slidesPath: "", backgrounds: [], slides: [], focuses: [])
     }
 
-    init(rootPath: String, slidesPath: String, backgrounds: [any Background.Type], slides: [any Slide.Type], focuses: [Focus]) {
+    public init(rootPath: String, slidesPath: String, backgrounds: [any Background.Type], slides: [any Slide.Type], focuses: [Focus]) {
         self.rootPath = rootPath
         self.slidesPath = slidesPath
         self.backgrounds = backgrounds
@@ -48,7 +48,7 @@ final class PresentationProperties: ObservableObject {
         self.focuses = focuses
     }
 
-    var selectedFocus: Int = 0 {
+    public var selectedFocus: Int = 0 {
         didSet {
             guard let newConfiguration = getConfiguration(for: selectedFocus), !(mode == .editor && moveCamera == false) else {
                 return
@@ -57,72 +57,72 @@ final class PresentationProperties: ObservableObject {
         }
     }
 
-    let rootPath: String
-    let slidesPath: String
-    var backgrounds: [any Background.Type]
-    var slides: [any Slide.Type]
-    @Published var focuses: [Focus]
+    public let rootPath: String
+    public let slidesPath: String
+    public var backgrounds: [any Background.Type]
+    public var slides: [any Slide.Type]
+    @Published public var focuses: [Focus]
 
-    @Published var mode: Mode = .presentation
-    @Published var colorScheme: ColorScheme = ColorScheme.dark
+    @Published public var mode: Mode = .presentation
+    @Published public var colorScheme: ColorScheme = ColorScheme.dark
 
-    @Published var automaticFameSize: Bool = true
-    @Published var frameSize: CGSize = CGSize(width: 1024, height: 768)
+    @Published public var automaticFameSize: Bool = true
+    @Published public var frameSize: CGSize = CGSize(width: 1024, height: 768)
 
-    @Published var automaticScreenSize: Bool = true
-    @Published var screenSize: CGSize = CGSize(width: 1024, height: 768)
+    @Published public var automaticScreenSize: Bool = true
+    @Published public var screenSize: CGSize = CGSize(width: 1024, height: 768)
 
-    @Published var loadThumbnails: Bool = false
+    @Published public var loadThumbnails: Bool = false
 
-    @Published var camera: Camera = .init(offset: .zero, scale: 1.0)
-    @Published var moveCamera: Bool = false
-    @Published var allowHotkeys: Bool = true
+    @Published public var camera: Camera = .init(offset: .zero, scale: 1.0)
+    @Published public var moveCamera: Bool = false
+    @Published public var allowHotkeys: Bool = true
 
-    static let defaultTitle = NSFont.systemFont(ofSize: 80, weight: .bold)
-    static let defaultSubTitle = NSFont.systemFont(ofSize: 70, weight: .regular)
-    static let defaultHeadline = NSFont.systemFont(ofSize: 50, weight: .bold)
-    static let defaultSubHeadline = NSFont.systemFont(ofSize: 40, weight: .regular)
-    static let defaultBody = NSFont.systemFont(ofSize: 30)
-    static let defaultNote = NSFont.systemFont(ofSize: 20, weight: .light)
-    static let defaultEditorFont = NSFont.systemFont(ofSize: 25, weight: .regular)
+    public static let defaultTitle = NSFont.systemFont(ofSize: 80, weight: .bold)
+    public static let defaultSubTitle = NSFont.systemFont(ofSize: 70, weight: .regular)
+    public static let defaultHeadline = NSFont.systemFont(ofSize: 50, weight: .bold)
+    public static let defaultSubHeadline = NSFont.systemFont(ofSize: 40, weight: .regular)
+    public static let defaultBody = NSFont.systemFont(ofSize: 30)
+    public static let defaultNote = NSFont.systemFont(ofSize: 20, weight: .light)
+    public static let defaultEditorFont = NSFont.systemFont(ofSize: 25, weight: .regular)
 
-    @Published var title: NSFont = PresentationProperties.defaultTitle {
+    @Published public var title: NSFont = PresentationProperties.defaultTitle {
         willSet {
             Font.presentationTitle = Font(newValue as CTFont)
         }
     }
 
-    @Published var subTitle: NSFont = PresentationProperties.defaultSubTitle  {
+    @Published public var subTitle: NSFont = PresentationProperties.defaultSubTitle  {
         willSet {
             Font.presentationSubTitle = Font(newValue as CTFont)
         }
     }
 
-    @Published var headline: NSFont = PresentationProperties.defaultHeadline {
+    @Published public var headline: NSFont = PresentationProperties.defaultHeadline {
         willSet {
             Font.presentationHeadline = Font(newValue as CTFont)
         }
     }
 
-    @Published var subHeadline: NSFont = PresentationProperties.defaultSubHeadline  {
+    @Published public var subHeadline: NSFont = PresentationProperties.defaultSubHeadline  {
         willSet {
             Font.presentationSubHeadline = Font(newValue as CTFont)
         }
     }
 
-    @Published var body: NSFont = PresentationProperties.defaultBody {
+    @Published public var body: NSFont = PresentationProperties.defaultBody {
         willSet {
             Font.presentationBody = Font(newValue as CTFont)
         }
     }
 
-    @Published var note: NSFont = PresentationProperties.defaultNote  {
+    @Published public var note: NSFont = PresentationProperties.defaultNote  {
         willSet {
             Font.presentationNote = Font(newValue as CTFont)
         }
     }
 
-    @Published var codeEditorFontSize: CGFloat = 25 {
+    @Published public var codeEditorFontSize: CGFloat = 25 {
         willSet {
             Font.presentationEditorFont = Font.system(size: newValue)
             Font.presentationEditorFontSize = newValue
