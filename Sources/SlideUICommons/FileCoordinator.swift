@@ -1,12 +1,12 @@
 import Foundation
 
-final class FileCoordinator {
-    static let shared = FileCoordinator()
+public final class FileCoordinator {
+    public static let shared = FileCoordinator()
     
     private static let workFolder = "/slides"
     
-    let appSupportURL: URL
-    var workFolder: String { appSupportURL.path + FileCoordinator.workFolder }
+    public let appSupportURL: URL
+    public var workFolder: String { appSupportURL.path + FileCoordinator.workFolder }
     private var preparedFolders: Set<String> = []
     
     private init() {
@@ -24,7 +24,7 @@ final class FileCoordinator {
         try! FileManager.default.createDirectory(atPath: appSupport.path + FileCoordinator.workFolder, withIntermediateDirectories: true)
     }
     
-    func pathToFolder(for name: String) -> String {
+    public func pathToFolder(for name: String) -> String {
         if preparedFolders.contains(name) {
             return workFolder + "/" + name
         }
