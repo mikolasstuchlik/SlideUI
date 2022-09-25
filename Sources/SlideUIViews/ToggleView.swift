@@ -7,7 +7,7 @@ public struct ToggleView<C: View>: View {
     @ViewBuilder public var content: () -> C
     
     public var alignment: Alignment = .bottomTrailing
-    @State public var toggledOn: Bool = fa lse
+    @State public var toggledOn: Bool = false
     @State public var placeholder: NSImage? = nil
 
     public var body: some View {
