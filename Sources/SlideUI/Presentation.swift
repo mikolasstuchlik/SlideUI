@@ -86,10 +86,11 @@ private enum MouseMoveMachine<Context>: Equatable {
 
 private struct PresentationHUD: View {
     @EnvironmentObject var presentation: PresentationProperties
+    let editing: Bool
 
     public var body: some View {
         HStack(spacing: 8) {
-            if !NSApplication.shared.areWindowsFirstResponder {
+            if editing {
                 Text("Editing")
                     .foregroundColor(.red)
                     .fontWeight(.bold)
@@ -119,7 +120,7 @@ public struct Presentation: View {
                         }
                     }
                     .preferredColorScheme(presentation.colorScheme)
-                PresentationHUD()
+                PresentationHUD(editing: NSApplication.shared.areWindowsFirstResponder)
             }
         }.onAppear {
             NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp, .leftMouseDragged, .leftMouseDown, .leftMouseUp, .flagsChanged], handler: handleMac(event:))
