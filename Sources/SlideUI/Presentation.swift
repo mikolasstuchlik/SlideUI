@@ -78,7 +78,7 @@ private struct PresentationHUD: View {
                     .foregroundColor(.red)
                     .fontWeight(.bold)
             }
-        }.onReceive(NotificationCenter.default.publisher(for: NSResponder.willChangeFirstResponder)) { notification in
+        }.onReceive(NotificationCenter.default.publisher(for: NSWindow.willChangeFirstResponder)) { notification in
             editing = !NSApplication.shared.areWindowsFirstResponder
         }
     }
@@ -107,7 +107,7 @@ public struct Presentation: View {
                     .preferredColorScheme(presentation.colorScheme)
             }
         }.onAppear {
-            NSResponder.swizzleBecomeFirstResponder()
+            NSWindow.swizzleBecomeFirstResponder()
             NSEvent.addLocalMonitorForEvents(
                 matching: [.keyDown, .keyUp, .leftMouseDragged, .leftMouseDown, .leftMouseUp, .flagsChanged],
                 handler: handleMac(event:)
