@@ -74,7 +74,7 @@ private enum MouseMoveMachine<Context>: Equatable {
 }
 
 public struct Presentation: View {
-    internal init() { }
+    public init() { }
 
     @EnvironmentObject var presentation: PresentationProperties
 
