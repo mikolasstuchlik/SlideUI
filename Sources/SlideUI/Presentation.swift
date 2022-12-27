@@ -291,7 +291,7 @@ public struct Presentation: View {
         guard
             event.type == .keyDown,
             event.keyCode == 53 /* escape */,
-            NSApplication.shared.areWindowsFirstResponder
+            !NSApplication.shared.areWindowsFirstResponder
         else {
             return false
         }
