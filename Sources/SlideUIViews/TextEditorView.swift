@@ -2,6 +2,13 @@ import SwiftUI
 import CodeEditor
 
 public struct TextEditorView: View {
+    public init(axis: TextEditorView.Axis, filePath: String, format: Binding<CodeEditor.Language>, content: Binding<String>) {
+        self.axis = axis
+        self.filePath = filePath
+        self._format = format
+        self._content = content
+    }
+
     public enum Axis {
         case horizontal, vertical
     }

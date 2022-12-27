@@ -2,6 +2,10 @@ import WebKit
 import SwiftUI
 
 public struct WebView: NSViewRepresentable {
+    public init(url: URL) {
+        self.url = url
+    }
+
     public var url: URL
 
     public static func dismantleNSView(_ nsView: WKWebView, coordinator: Self.Coordinator) {

@@ -2,6 +2,13 @@ import SwiftUI
 import SlideUI
 
 public struct ToggleView<C: View>: View {
+    public init(@ViewBuilder content: @escaping () -> C, alignment: Alignment = .bottomTrailing, toggledOn: Bool = false, placeholder: NSImage? = nil) {
+        self.content = content
+        self.alignment = alignment
+        self.toggledOn = toggledOn
+        self.placeholder = placeholder
+    }
+
     @EnvironmentObject public var presentation: PresentationProperties
     
     @ViewBuilder public var content: () -> C

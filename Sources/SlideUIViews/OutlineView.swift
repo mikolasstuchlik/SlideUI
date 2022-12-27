@@ -1,6 +1,11 @@
 import SwiftUI
 
 public struct OutlineView<C: View>: View {
+    public init(title: String, @ViewBuilder content: @escaping () -> C) {
+        self.title = title
+        self.content = content
+    }
+
     public let title: String
     @ViewBuilder public var content: () -> C
     

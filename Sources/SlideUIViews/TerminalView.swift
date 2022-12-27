@@ -2,6 +2,14 @@ import SwiftUI
 import CodeEditor
 
 public struct TerminalView: View {
+    public init(axis: TerminalView.Axis, workingPath: URL, aspectRatio: CGFloat, stdIn: Binding<String>, state: Binding<TerminalView.State>) {
+        self.axis = axis
+        self.workingPath = workingPath
+        self.aspectRatio = aspectRatio
+        self._stdIn = stdIn
+        self._state = state
+    }
+
     public enum Axis {
         case horizontal, vertical
     }

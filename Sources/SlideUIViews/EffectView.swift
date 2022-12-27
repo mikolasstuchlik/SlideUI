@@ -2,6 +2,11 @@ import AppKit
 import SwiftUI
 
 public struct EffectView: NSViewRepresentable {
+    public init(material: NSVisualEffectView.Material = .headerView, blendingMode: NSVisualEffectView.BlendingMode = .withinWindow) {
+        self.material = material
+        self.blendingMode = blendingMode
+    }
+
     @State var material: NSVisualEffectView.Material = .headerView
     @State var blendingMode: NSVisualEffectView.BlendingMode = .withinWindow
 

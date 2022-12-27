@@ -85,6 +85,15 @@ public func \(symbolName)() -> Any {
 }
 
 public struct CompilerView: View {
+    public init(axis: CompilerView.Axis, uniqueName: String, code: Binding<String>, state: Binding<CompilerView.State>, buildCommand: Binding<String>, editBuildCommand: Bool = false) {
+        self.axis = axis
+        self.uniqueName = uniqueName
+        self._code = code
+        self._state = state
+        self._buildCommand = buildCommand
+        self.editBuildCommand = editBuildCommand
+    }
+
     private final class Providers {
         private static var providers: [String: RuntimeViewProvider] = [:]
         
