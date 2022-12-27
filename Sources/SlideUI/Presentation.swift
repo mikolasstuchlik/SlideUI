@@ -2,23 +2,6 @@ import SwiftUI
 import SlideUICommons
 import AppKit
 
-extension CGVector: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(dx)
-        hasher.combine(dy)
-    }
-}
-
-extension NSApplication {
-    var areWindowsFirstResponder: Bool {
-        windows.allSatisfy { $0.firstResponder === $0 }
-    }
-
-    func makeWindowsFirstResponder() {
-        windows.forEach { $0.makeFirstResponder(nil) }
-    }
-}
-
 public enum Focus: Hashable {
     public struct Properties: Hashable {
         public init(offset: CGVector, scale: CGFloat, hint: String? = nil) {
@@ -86,7 +69,7 @@ private enum MouseMoveMachine<Context>: Equatable {
 
 private struct PresentationHUD: View {
     @EnvironmentObject var presentation: PresentationProperties
-    let editing: Bool
+    @State var editing: Bool = !NSApplication.shared.areWindowsFirstResponder
 
     public var body: some View {
         HStack(spacing: 8) {
@@ -95,6 +78,8 @@ private struct PresentationHUD: View {
                     .foregroundColor(.red)
                     .fontWeight(.bold)
             }
+        }.onReceive(NotificationCenter.default.publisher(for: NSResponder.willChangeFirstResponder)) { notification in
+            editing = !NSApplication.shared.areWindowsFirstResponder
         }
     }
 }
@@ -120,10 +105,13 @@ public struct Presentation: View {
                         }
                     }
                     .preferredColorScheme(presentation.colorScheme)
-                PresentationHUD(editing: NSApplication.shared.areWindowsFirstResponder)
             }
         }.onAppear {
-            NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp, .leftMouseDragged, .leftMouseDown, .leftMouseUp, .flagsChanged], handler: handleMac(event:))
+            NSResponder.swizzleBecomeFirstResponder()
+            NSEvent.addLocalMonitorForEvents(
+                matching: [.keyDown, .keyUp, .leftMouseDragged, .leftMouseDown, .leftMouseUp, .flagsChanged],
+                handler: handleMac(event:)
+            )
         }
     }
 
