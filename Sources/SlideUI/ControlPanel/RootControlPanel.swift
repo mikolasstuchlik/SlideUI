@@ -9,13 +9,14 @@ private let timeDateFormatter: DateFormatter = {
 }()
 
 @available(macOS 13.0, *)
-struct SlideControlPanel: View {
+public struct SlideControlPanel: View {
+    public init() { }
 
     @EnvironmentObject var presentation: PresentationProperties
     @Environment(\.openWindow) private var openWindow
 
 
-    var body: some View {
+    public var body: some View {
         HStack(spacing: 16) {
             VStack(spacing: 16) {
                 Button {

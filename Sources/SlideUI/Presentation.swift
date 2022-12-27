@@ -10,10 +10,16 @@ extension CGVector: Hashable {
 
 public enum Focus: Hashable {
     public struct Properties: Hashable {
-        let uuid: UUID = UUID()
-        var offset: CGVector
-        var scale: CGFloat
-        var hint: String?
+        public init(offset: CGVector, scale: CGFloat, hint: String? = nil) {
+            self.offset = offset
+            self.scale = scale
+            self.hint = hint
+        }
+
+        public let uuid: UUID = UUID()
+        public var offset: CGVector
+        public var scale: CGFloat
+        public var hint: String?
     }
 
     case slides([any Slide.Type])
@@ -67,13 +73,15 @@ private enum MouseMoveMachine<Context>: Equatable {
     }
 }
 
-struct Presentation: View {
+public struct Presentation: View {
+    internal init() { }
+
     @EnvironmentObject var presentation: PresentationProperties
 
     @State private var mouseMoveMachine: MouseMoveMachine<Void> = .idle
     @State private var moveSlideMachine: MouseMoveMachine<any Slide.Type> = .idle
 
-    var body: some View {
+    public var body: some View {
         GeometryReader { geometry in
             plane
                 .onChange(of: geometry.size) { newSize in
