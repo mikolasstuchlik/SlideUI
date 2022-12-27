@@ -15,7 +15,6 @@ public struct SlideControlPanel: View {
     @EnvironmentObject var presentation: PresentationProperties
     @Environment(\.openWindow) private var openWindow
 
-
     public var body: some View {
         HStack(spacing: 16) {
             VStack(spacing: 16) {

@@ -1,10 +1,21 @@
 import SwiftUI
 import SlideUICommons
+import AppKit
 
 extension CGVector: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(dx)
         hasher.combine(dy)
+    }
+}
+
+extension NSApplication {
+    var areWindowsFirstResponder: Bool {
+        windows.allSatisfy { $0.firstResponder === $0 }
+    }
+
+    func makeWindowsFirstResponder() {
+        windows.forEach { $0.makeFirstResponder(nil) }
     }
 }
 
@@ -73,6 +84,20 @@ private enum MouseMoveMachine<Context>: Equatable {
     }
 }
 
+private struct PresentationHUD: View {
+    @EnvironmentObject var presentation: PresentationProperties
+
+    public var body: some View {
+        HStack(spacing: 8) {
+            if !NSApplication.shared.areWindowsFirstResponder {
+                Text("Editing")
+                    .foregroundColor(.red)
+                    .fontWeight(.bold)
+            }
+        }
+    }
+}
+
 public struct Presentation: View {
     public init() { }
 
@@ -83,16 +108,19 @@ public struct Presentation: View {
 
     public var body: some View {
         GeometryReader { geometry in
-            plane
-                .onChange(of: geometry.size) { newSize in
-                    if presentation.automaticFameSize {
-                        presentation.frameSize = newSize
+            ZStack(alignment: .bottomTrailing) {
+                plane
+                    .onChange(of: geometry.size) { newSize in
+                        if presentation.automaticFameSize {
+                            presentation.frameSize = newSize
+                        }
+                        if presentation.automaticScreenSize {
+                            presentation.screenSize = newSize
+                        }
                     }
-                    if presentation.automaticScreenSize {
-                        presentation.screenSize = newSize
-                    }
-                }
-                .preferredColorScheme(presentation.colorScheme)
+                    .preferredColorScheme(presentation.colorScheme)
+                PresentationHUD()
+            }
         }.onAppear {
             NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp, .leftMouseDragged, .leftMouseDown, .leftMouseUp, .flagsChanged], handler: handleMac(event:))
         }
@@ -125,7 +153,7 @@ public struct Presentation: View {
         if resolveNavigation(event: event) {
             return nil
         }
-        if resolveModeSwap(event: event) {
+        if resolveResponder(event: event) {
             return nil
         }
 
@@ -195,7 +223,10 @@ public struct Presentation: View {
     }
 
     private func resolveZoomHotkeys(event: NSEvent) -> Bool {
-        guard presentation.mode != .entry, event.type == .keyDown else {
+        guard
+            NSApplication.shared.areWindowsFirstResponder,
+            event.type == .keyDown
+        else {
             return false
         }
         switch event.keyCode {
@@ -238,7 +269,7 @@ public struct Presentation: View {
 
     private func resolveNavigation(event: NSEvent) -> Bool {
         guard
-            presentation.mode == .presentation,
+            NSApplication.shared.areWindowsFirstResponder,
             event.type == .keyDown
         else {
             return false
@@ -256,20 +287,16 @@ public struct Presentation: View {
         return true
     }
 
-    private func resolveModeSwap(event: NSEvent) -> Bool {
+    private func resolveResponder(event: NSEvent) -> Bool {
         guard
             event.type == .keyDown,
-            event.keyCode == 53 /* escape */
+            event.keyCode == 53 /* escape */,
+            NSApplication.shared.areWindowsFirstResponder
         else {
             return false
         }
 
-        switch presentation.mode {
-        case .presentation:
-            presentation.mode = .entry
-        case .entry, .editor:
-            presentation.mode = .presentation
-        }
+        NSApplication.shared.makeWindowsFirstResponder()
 
         return true
     }
