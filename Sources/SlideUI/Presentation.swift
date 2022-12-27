@@ -105,6 +105,7 @@ public struct Presentation: View {
                         }
                     }
                     .preferredColorScheme(presentation.colorScheme)
+                PresentationHUD()
             }
         }.onAppear {
             NSWindow.swizzleBecomeFirstResponder()
