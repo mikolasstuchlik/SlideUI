@@ -88,11 +88,7 @@ public extension Process {
             fallbackToEnv: fallbackToEnv
         )
 
-        if #available(macOS 10.13, *) {
-            try process.run()
-        } else {
-            process.launch()
-        }
+        try process.run()
         process.waitUntilExit()
 
         guard process.terminationStatus == 0 else {

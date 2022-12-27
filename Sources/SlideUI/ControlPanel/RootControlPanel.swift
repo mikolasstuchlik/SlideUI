@@ -8,7 +8,6 @@ private let timeDateFormatter: DateFormatter = {
     return formatter
 }()
 
-@available(macOS 13.0, *)
 public struct SlideControlPanel: View {
     public init() { }
 
@@ -32,8 +31,6 @@ public struct SlideControlPanel: View {
                     Spacer()
                         .frame(maxHeight: .infinity)
                 }
-                Text("Klávesové zkratky").bold().frame(maxWidth: .infinity, alignment: .leading)
-                Text(presentation.mode.hotkeyHint.joined(separator: "\n"))
                 Text("Ovládání prezentace").bold().frame(maxWidth: .infinity, alignment: .leading)
                 VStack {
                     Grid {
@@ -50,9 +47,8 @@ public struct SlideControlPanel: View {
                                     }
                                 )
                             ) {
-                                Text("Inspekce").tag(0)
-                                Text("Prezentace").tag(1)
-                                Text("Editor").tag(2)
+                                Text("Prezentace").tag(0)
+                                Text("Editor").tag(1)
                             }
                             .pickerStyle(.segmented)
                             .gridCellColumns(2)
@@ -60,9 +56,7 @@ public struct SlideControlPanel: View {
                                 presentation.loadThumbnails.toggle()
                             }
                         }
-                        if presentation.mode == .entry {
-                            InputModePanel()
-                        }
+                        InputModePanel()
                         if presentation.mode == .editor {
                             EditModePanel(environment: presentation)
                         }

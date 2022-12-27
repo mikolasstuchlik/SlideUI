@@ -83,16 +83,10 @@ public struct TerminalView: View {
                     .foregroundColor(.gray)
                     .font(.system(.footnote))
                     .frame(maxWidth: .infinity, maxHeight: 12, alignment: .leading)
-                if #available(macOS 13.0, *) {
-                    Text(stdout ?? "(Empty)")
-                        .monospaced()
-                        .font(.presentationEditorFont)
-                        .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-                } else {
-                    Text(stdout ?? "(Empty)")
-                        .font(.presentationEditorFont)
-                        .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-                }
+                Text(stdout ?? "(Empty)")
+                    .monospaced()
+                    .font(.presentationEditorFont)
+                    .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
             case let .result(.failure(ProcessError.endedWith(code: code, error: stderr))):
                 Text("Status: \(code)  stderr:")
                     .foregroundColor(.gray)

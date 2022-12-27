@@ -4,8 +4,6 @@ import SlideUICommons
 struct InputModePanel: View {
     @EnvironmentObject var presentation: PresentationProperties
 
-    @State var focusManualEntry: String = ""
-
     @State var screenXManualEntry: String = ""
     @State var screenYManualEntry: String = ""
 
@@ -13,38 +11,6 @@ struct InputModePanel: View {
     @State var slideYManualEntry: String = ""
 
     var body: some View {
-        GridRow {
-            Text("Zaměřený slide:")
-            Button("Předchozí") {
-                presentation.selectedFocus -= 1
-            }
-            Button("Následující") {
-                presentation.selectedFocus += 1
-            }
-            HStack {
-                TextField("Manuální", text: $focusManualEntry)
-                Button("Přejít") {
-                    Int(focusManualEntry).flatMap { presentation.selectedFocus = $0 }
-                }
-            }
-        }
-        GridRow {
-            Text("Pozice kamery")
-            Grid {
-                GridRow {
-                    Text("Scale: \(presentation.camera.scale)")
-                    Slider(value: $presentation.camera.scale, in: ClosedRange<CGFloat>(0.1...2))
-                }
-                GridRow {
-                    Text("X")
-                    Text("\(presentation.camera.offset.dx)")
-                }
-                GridRow {
-                    Text("Y")
-                    Text("\(presentation.camera.offset.dy)")
-                }
-            }.gridCellColumns(3)
-        }
         GridRow {
             Text("Velikost obrazovky")
             Toggle(isOn: $presentation.automaticScreenSize, label: { Text("Automaticky") })

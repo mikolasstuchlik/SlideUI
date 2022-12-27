@@ -3,37 +3,7 @@ import SlideUICommons
 
 public final class PresentationProperties: ObservableObject {
     public enum Mode: Int, Equatable {
-        case entry, presentation, editor
-
-        private static let navigationHotkeys = [
-            "`spacebar`, `enter` - increment focus",
-            "`backspace` - decrement focus",
-        ]
-
-        private static let globalHotkeys = [
-            "`escape` - toggles between Inspection and Presentation mode",
-            "`cmd` + *mouse drag* - move the camera",
-        ]
-
-        private static let editorHotkeys = [
-            "`shift` + *mouse drag* - move slide on the plane",
-        ]
-
-        private static let scaleHotkeys = [
-            "`n` - zoom out",
-            "`m` - zoom in",
-        ]
-
-        var hotkeyHint: [String] {
-            switch self {
-            case .editor:
-                return Mode.globalHotkeys + Mode.scaleHotkeys + Mode.editorHotkeys
-            case .presentation:
-                return Mode.globalHotkeys + Mode.scaleHotkeys + Mode.navigationHotkeys
-            case .entry:
-                return Mode.globalHotkeys
-            }
-        }
+        case presentation, editor
     }
 
     public static func preview() -> PresentationProperties {
