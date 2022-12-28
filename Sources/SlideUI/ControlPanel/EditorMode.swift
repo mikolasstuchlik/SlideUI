@@ -18,11 +18,6 @@ struct EditModePanel: View {
 
     var body: some View {
         GridRow {
-            Text("Pohyby")
-            Toggle(isOn: $presentation.moveCamera, label: { Text("Zaostřit na vybraný snímek") })
-            Toggle(isOn: $presentation.allowHotkeys, label: { Text("Povolit zkratky") })
-        }
-        GridRow {
             Text("Code generation")
             Button("Save offsets") {
                 let editor = OffsetCodeManipulator(slidesPath: presentation.slidesPath, knowSlides: presentation.slides)

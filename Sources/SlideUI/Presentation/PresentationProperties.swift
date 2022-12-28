@@ -20,11 +20,15 @@ public final class PresentationProperties: ObservableObject {
 
     public var selectedFocus: Int = 0 {
         didSet {
-            guard let newConfiguration = getConfiguration(for: selectedFocus), !(mode == .editor && moveCamera == false) else {
+            guard let newConfiguration = getConfiguration(for: selectedFocus) else {
                 return
             }
             camera = .init(offset: newConfiguration.offset, scale: newConfiguration.scale)
         }
+    }
+
+    public func moveTo(slide: any Slide.Type) {
+        camera = .init(offset: slide.offset, scale: slide.singleFocusScale)
     }
 
     public let rootPath: String
@@ -34,6 +38,8 @@ public final class PresentationProperties: ObservableObject {
     @Published public var focuses: [Focus]
 
     @Published public var mode: Mode = .presentation
+    @Published public var cameraFreeRoam: Bool = false
+    @Published public var hoveredSlide: (any Slide.Type)? = nil
     @Published public var colorScheme: ColorScheme = ColorScheme.dark
 
     @Published public var automaticFameSize: Bool = true
@@ -45,8 +51,6 @@ public final class PresentationProperties: ObservableObject {
     @Published public var loadThumbnails: Bool = false
 
     @Published public var camera: Camera = .init(offset: .zero, scale: 1.0)
-    @Published public var moveCamera: Bool = false
-    @Published public var allowHotkeys: Bool = true
 
     public static let defaultTitle = NSFont.systemFont(ofSize: 80, weight: .bold)
     public static let defaultSubTitle = NSFont.systemFont(ofSize: 70, weight: .regular)
@@ -164,5 +168,34 @@ public extension Font {
     static fileprivate(set) var presentationNote: Font = { Font(PresentationProperties.defaultNote as CTFont) }()
     static fileprivate(set) var presentationEditorFont: Font = { Font(PresentationProperties.defaultEditorFont as CTFont) }()
     static fileprivate(set) var presentationEditorFontSize: CGFloat = { PresentationProperties.defaultEditorFont.pointSize }()
+}
+
+extension PresentationProperties {
+    func offset(for position: NSPoint, in window: CGSize) -> CGVector {
+        CGVector(
+            dx: (position.x - window.width / 2) / window.width / camera.scale,
+            dy: (position.y - window.height / 2) / window.height / camera.scale
+        ).invertedDY()
+    }
+
+    func absoluteToOffset(size: CGSize) -> CGSize {
+        CGSize(
+            width: size.width / screenSize.width,
+            height: size.height / screenSize.height
+        )
+    }
+
+    func getOffsetRect(of slide: any Slide.Type) -> CGRect {
+        let offset = slide.offset
+        let offsetSize = absoluteToOffset(size: frameSize)
+        return CGRect(
+            origin: CGPoint(
+                x: offset.dx - offsetSize.width / 2,
+                y: offset.dy - offsetSize.height / 2
+            ),
+            size: offsetSize
+        )
+    }
+
 }
 
