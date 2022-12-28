@@ -2,10 +2,8 @@
 
 A description of this package.
 
-
 TODO:
  - Rething "editor mode" - add separate focus manager and slide manager ... ?
- - Add hud to the bottom of the presentation
  - Add template
  - Add documentation
 
