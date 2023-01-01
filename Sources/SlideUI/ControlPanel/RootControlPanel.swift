@@ -13,20 +13,27 @@ public struct SlideControlPanel: View {
 
     @EnvironmentObject var presentation: PresentationProperties
     @Environment(\.openWindow) private var openWindow
+    @State var selectedFocusUUID: UUID?
+    @State var selectedSlideIndex: Int?
 
     public var body: some View {
         HStack(spacing: 16) {
             VStack(spacing: 16) {
-                Button {
-                    openWindow(id: "slides")
-                } label: {
-                    Image(systemName: "play.circle.fill")
-                        .resizable()
-                        .foregroundStyle(.primary, .secondary, .green)
-                        .frame(width: 50, height: 50)
+                HStack {
+                    Button {
+                        openWindow(id: "slides")
+                    } label: {
+                        Image(systemName: "play.circle.fill")
+                            .resizable()
+                            .foregroundStyle(.primary, .secondary, .green)
+                            .frame(width: 50, height: 50)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(width: 50, height: 50)
+                    Button("Reload placeholders") {
+                        presentation.loadThumbnails.toggle()
+                    }
                 }
-                .buttonStyle(.plain)
-                .frame(width: 50, height: 50)
                 if presentation.mode != .editor {
                     Spacer()
                         .frame(maxHeight: .infinity)
@@ -52,21 +59,23 @@ public struct SlideControlPanel: View {
                             }
                             .pickerStyle(.segmented)
                             .gridCellColumns(2)
-                            Button("Reload placeholders") {
-                                presentation.loadThumbnails.toggle()
-                            }
+                            Spacer()
                         }
                         InputModePanel()
                         if presentation.mode == .editor {
-                            EditModePanel(environment: presentation)
+                            EditModePanel(selectedFocusUUID: $selectedFocusUUID, selectedSlideIndex: $selectedSlideIndex )
                         }
                     }
                 }
             }
             Divider()
             VStack(spacing: 16) {
-                Text("Poznámky pro zaostřené").bold().frame(maxWidth: .infinity, alignment: .leading)
-                HintView(environment: presentation)
+                if presentation.mode == .presentation {
+                    Text("Poznámky pro zaostřené").bold().frame(maxWidth: .infinity, alignment: .leading)
+                    HintView()
+                } else {
+                    InputEditorView(selectedFocusUUID: $selectedFocusUUID, selectedSlideIndex: $selectedSlideIndex)
+                }
             }
         }.padding()
     }

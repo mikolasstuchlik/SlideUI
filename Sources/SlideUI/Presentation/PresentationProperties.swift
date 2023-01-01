@@ -20,15 +20,18 @@ public final class PresentationProperties: ObservableObject {
 
     public var selectedFocus: Int = 0 {
         didSet {
-            guard let newConfiguration = getConfiguration(for: selectedFocus) else {
-                return
+            if let newConfiguration = getConfiguration(for: selectedFocus) {
+                camera = newConfiguration.camera
+                hint = newConfiguration.hint
+            } else {
+                hint = "Mimo plánovaný průchod"
             }
-            camera = .init(offset: newConfiguration.offset, scale: newConfiguration.scale)
         }
     }
 
     public func moveTo(slide: any Slide.Type) {
         camera = .init(offset: slide.offset, scale: slide.singleFocusScale)
+        hint = slide.hint
     }
 
     public let rootPath: String
@@ -51,6 +54,7 @@ public final class PresentationProperties: ObservableObject {
     @Published public var loadThumbnails: Bool = false
 
     @Published public var camera: Camera = .init(offset: .zero, scale: 1.0)
+    @Published public var hint: String? = nil
 
     public static let defaultTitle = NSFont.systemFont(ofSize: 80, weight: .bold)
     public static let defaultSubTitle = NSFont.systemFont(ofSize: 70, weight: .regular)
@@ -103,7 +107,7 @@ public final class PresentationProperties: ObservableObject {
         }
     }
 
-    private func getConfiguration(for newFocusIndex: Int) -> Focus.Properties? {
+    private func getConfiguration(for newFocusIndex: Int) -> PresentableFocus? {
         guard
             newFocusIndex >= 0,
             newFocusIndex < focuses.count
@@ -111,21 +115,27 @@ public final class PresentationProperties: ObservableObject {
             return nil
         }
 
-        switch focuses[newFocusIndex] {
-        case let .slides(slides) where slides.count == 1:
-            return singleSlideFocus(for: slides.first!)
-        case let .slides(slides):
-            return computeFocus(for: slides)
-        case let .properties(properties):
-            return properties
+        switch focuses[newFocusIndex].kind {
+        case let .specific(slides) where slides.count == 1:
+            var result = singleSlideFocus(for: slides.first!)
+            let hint = result?.hint ?? ""
+            result?.hint = (focuses[newFocusIndex].hint.flatMap { $0 + "\n\n--\n\n" } ?? "" ) + hint
+            return result
+        case let .specific(slides):
+            var result = computeFocus(for: slides)
+            let hint = result?.hint ?? ""
+            result?.hint = (focuses[newFocusIndex].hint.flatMap { $0 + "\n\n--\n\n" } ?? "") + hint
+            return result
+        case let .unbound(camera):
+            return .init(camera: camera, hint: focuses[newFocusIndex].hint)
         }
     }
 
-    private func singleSlideFocus(for slide: any Slide.Type) -> Focus.Properties {
-        .init(offset: slide.offset, scale: slide.singleFocusScale, hint: slide.hint)
+    private func singleSlideFocus(for slide: any Slide.Type) -> PresentableFocus? {
+        .init(camera: .init(offset: slide.offset, scale: slide.singleFocusScale), hint: slide.hint)
     }
 
-    private func computeFocus(for slides: [any Slide.Type]) -> Focus.Properties? {
+    private func computeFocus(for slides: [any Slide.Type]) -> PresentableFocus? {
         guard !slides.isEmpty else { return nil }
 
         var minXOffset = slides.first!.offset.dx
@@ -154,7 +164,8 @@ public final class PresentationProperties: ObservableObject {
             .compactMap { slide in slide.hint.flatMap { "**\(slide.name):**\n" + $0 } }
             .joined(separator: "\n\n--\n\n")
 
-        return .init(offset: newOffset, scale: newScale - 0.01, hint: newHint)
+        let camera = Camera(offset: newOffset, scale: newScale - 0.01)
+        return .init(camera: camera, hint: newHint)
     }
 
 }

@@ -125,50 +125,43 @@ final class FocusCodeManipulator {
 
         func focusArrayContent() -> String {
             var acumulator: [String] = []
-            var hintIndex = 0
-            for focus in knownFocuses {
-                switch focus {
-                case let .properties(properties):
-                    acumulator.append(
-                        ".properties(.init(offset: CGVector(dx: \(properties.offset.dx), dy: \(properties.offset.dy)), scale: \(properties.scale), hint: generated_hint_\(hintIndex))),"
-                    )
-                    hintIndex += 1
-                case let .slides(slides):
-                    var line = ".slides(["
-                    for slide in slides {
-                        line += String(describing: slide.self) + ".self, "
-                    }
-                    line += "]),"
-                    acumulator.append(line)
+            for (index, focus) in knownFocuses.enumerated() {
+                var line = ""
+
+                line += "Focus(kind: "
+
+                switch focus.kind {
+                case let .unbound(camera):
+                    line += ".unbound(Camera(offset: CGVector(dx: \(camera.offset.dx), dy: \(camera.offset.dy)), scale: \(camera.scale)))"
+                case let .specific(slides):
+                    line += ".specific(["
+                    line += slides.map { String(describing: $0.self) + ".self" }.joined(separator: ", ")
+                    line += "])"
                 }
+
+                line += ", hint: generated_hint_\(index))"
+                acumulator.append(line)
             }
 
-            return acumulator.map { indentation + "    " + $0 }.joined(separator: "\n")
+            return acumulator.map { indentation + "    " + $0 }.joined(separator: ",\n")
         }
 
         func hintContent() -> String {
             var acumulator: [String] = []
-            var hintIndex = 0
-            for focus in knownFocuses {
-                switch focus {
-                case let .properties(properties):
-                    let hintString =
+            for (index, focus) in knownFocuses.enumerated() {
+                let hintString =
 #"""
-\#(indentation)private let generated_hint_\#(hintIndex): String =
+\#(indentation)private let generated_hint_\#(index): String =
 """
 
 """#
-        +
-        (properties.hint.flatMap {$0 + "\n" } ?? "")
-        +
+    +
+    (focus.hint.flatMap {$0 + "\n" } ?? "")
+    +
 #"""
 """
 """#
-                    acumulator.append(hintString)
-                    hintIndex += 1
-                default:
-                    break
-                }
+                acumulator.append(hintString)
             }
 
             return acumulator.joined(separator: "\n\n")

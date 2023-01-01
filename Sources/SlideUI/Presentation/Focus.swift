@@ -1,45 +1,54 @@
 import Foundation
 
-public enum Focus: Hashable {
-    public struct Properties: Hashable {
-        public init(offset: CGVector, scale: CGFloat, hint: String? = nil) {
-            self.offset = offset
-            self.scale = scale
-            self.hint = hint
-        }
-
-        public let uuid: UUID = UUID()
-        public var offset: CGVector
-        public var scale: CGFloat
-        public var hint: String?
+public struct Focus: Hashable {
+    public init(kind: Focus.Kind, hint: String? = nil) {
+        self.uuid = UUID()
+        self.kind = kind
+        self.hint = hint
     }
 
-    case slides([any Slide.Type])
-    case properties(Properties)
+    public enum Kind: Hashable {
+        case unbound(Camera)
+        case specific([any Slide.Type])
 
-    public static func == (lhs: Focus, rhs: Focus) -> Bool {
-        switch (lhs, rhs) {
-        case let (.slides(lCont), .slides(rCont)):
-            return lCont.map { $0.name } == rCont.map { $0.name }
-        case let (.properties(lCont), .properties(rCont)) where lCont == rCont:
-            return true
-        default:
-            return false
+        public static func == (lhs: Kind, rhs: Kind) -> Bool {
+            switch (lhs, rhs) {
+            case let (.specific(lCont), .specific(rCont)):
+                return lCont.map { $0.name } == rCont.map { $0.name }
+            case let (.unbound(lCamera), .unbound(rCamera)):
+                return lCamera == rCamera
+            default:
+                return false
+            }
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            switch self {
+            case let .specific(slides):
+                hasher.combine(0)
+                hasher.combine(slides.map { $0.name })
+            case let .unbound(camera):
+                hasher.combine(camera)
+            }
         }
     }
 
-    public func hash(into hasher: inout Hasher) {
-        switch self {
-        case let .properties(properties):
-            hasher.combine(0)
-            hasher.combine(properties)
-        case let .slides(slides):
-            hasher.combine(slides.map { $0.name })
-        }
-    }
+    public let uuid: UUID
+    public var kind: Kind
+    public var hint: String?
 }
 
-public struct Camera: Equatable {
-    var offset: CGVector
-    var scale: CGFloat
+public struct Camera: Hashable {
+    public init(offset: CGVector, scale: CGFloat) {
+        self.offset = offset
+        self.scale = scale
+    }
+
+    public var offset: CGVector
+    public var scale: CGFloat
+}
+
+public struct PresentableFocus {
+    var camera: Camera
+    var hint: String?
 }

@@ -13,7 +13,14 @@ struct InputModePanel: View {
     var body: some View {
         GridRow {
             Text("Velikost obrazovky")
-            Toggle(isOn: $presentation.automaticScreenSize, label: { Text("Automaticky") })
+            HStack {
+                Button("Použít") {
+                    if let w = Double(screenXManualEntry), let h = Double(screenYManualEntry) {
+                        presentation.screenSize = CGSize(width: CGFloat(w), height: CGFloat(h))
+                    }
+                }
+                Toggle(isOn: $presentation.automaticScreenSize, label: { Text("Automaticky") })
+            }
             TextField("X", text: $screenXManualEntry)
                 .disabled(presentation.automaticScreenSize)
                 .onChange(of: presentation.screenSize) { screenXManualEntry = "\($0.width)" }
@@ -22,34 +29,21 @@ struct InputModePanel: View {
                 .onChange(of: presentation.screenSize) { screenYManualEntry = "\($0.height)" }
         }
         GridRow {
-            Spacer()
-            Spacer()
-            Spacer()
-            Button("Použít") {
-                if let w = Double(screenXManualEntry), let h = Double(screenYManualEntry) {
-                    presentation.screenSize = CGSize(width: CGFloat(w), height: CGFloat(h))
-                }
-            }
-        }
-        GridRow {
             Text("Velikost slidu")
-            Toggle(isOn: $presentation.automaticFameSize, label: { Text("Automaticky") })
+            HStack {
+                Button("Použít") {
+                    if let w = Double(slideXManualEntry), let h = Double(slideYManualEntry) {
+                        presentation.frameSize = CGSize(width: CGFloat(w), height: CGFloat(h))
+                    }
+                }
+                Toggle(isOn: $presentation.automaticFameSize, label: { Text("Automaticky") })
+            }
             TextField("X", text: $slideXManualEntry)
                 .disabled(presentation.automaticFameSize)
                 .onChange(of: presentation.frameSize) { slideXManualEntry = "\($0.width)" }
             TextField("Y", text: $slideYManualEntry)
                 .disabled(presentation.automaticFameSize)
                 .onChange(of: presentation.frameSize) { slideYManualEntry = "\($0.height)" }
-        }
-        GridRow {
-            Spacer()
-            Spacer()
-            Spacer()
-            Button("Použít") {
-                if let w = Double(slideXManualEntry), let h = Double(slideYManualEntry) {
-                    presentation.frameSize = CGSize(width: CGFloat(w), height: CGFloat(h))
-                }
-            }
         }
         GridRow {
             Text("Barevné schéma")
