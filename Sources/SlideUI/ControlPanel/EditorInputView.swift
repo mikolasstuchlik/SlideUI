@@ -13,7 +13,7 @@ struct InputEditorView: View {
         } else if let selectedSlideIndex {
             SlideEditor(selectedSlideIndex: $selectedSlideIndex)
         } else {
-            Text("LOC_pick_item_to_edit")
+            Text(NSLocalizedString("LOC_pick_item_to_edit", bundle: .module, comment: "LOC_pick_item_to_edit"))
         }
     }
 }
@@ -30,11 +30,11 @@ private struct SlideEditor: View {
 
     var body: some View {
         VStack {
-            Button("LOC_apply") {
+            Button(NSLocalizedString("LOC_apply", bundle: .module, comment: "LOC_apply")) {
                 store(index: selectedSlideIndex)
             }
-            TextField("LOC_X", text: $XEntry)
-            TextField("LOC_Y", text: $YEntry)
+            TextField(NSLocalizedString("LOC_X", bundle: .module, comment: "LOC_X"), text: $XEntry)
+            TextField(NSLocalizedString("LOC_Y", bundle: .module, comment: "LOC_Y"), text: $YEntry)
             TextEditor(text: $hint)
         }
         .onAppear {
@@ -90,15 +90,15 @@ private struct FocusEditor: View {
 
     var body: some View {
         VStack {
-            Button("LOC_apply") {
+            Button(NSLocalizedString("LOC_apply", bundle: .module, comment: "LOC_apply")) {
                 store(uuid: selectedFocusUUID)
             }
-            Picker("LOC_type", selection: .init(
+            Picker(NSLocalizedString("LOC_type", bundle: .module, comment: "LOC_type"), selection: .init(
                     get: { kind.rawValue },
                     set: { kind = .init(rawValue: $0)! }
             )) {
-                Text("LOC_freecam").tag(0)
-                Text("LOC_slide_focus").tag(1)
+                Text(NSLocalizedString("LOC_freecam", bundle: .module, comment: "LOC_freecam")).tag(0)
+                Text(NSLocalizedString("LOC_slide_focus", bundle: .module, comment: "LOC_slide_focus")).tag(1)
             }
             .pickerStyle(.segmented)
 
@@ -116,7 +116,7 @@ private struct FocusEditor: View {
                     }
                 }
                 Divider()
-                Menu("LOC_add") {
+                Menu(NSLocalizedString("LOC_add", bundle: .module, comment: "LOC_add")) {
                     ForEach(presentation.slides.indices) { slideIndex in
                         let name = presentation.slides[slideIndex].name
                         Button(name) {
@@ -127,9 +127,9 @@ private struct FocusEditor: View {
                     }
                 }.frame(width: 100)
             case .unbound:
-                TextField("LOC_X", text: $XEntry)
-                TextField("LOC_Y", text: $YEntry)
-                TextField("LOC_scale", text: $scaleEntry)
+                TextField(NSLocalizedString("LOC_X", bundle: .module, comment: "LOC_X"), text: $XEntry)
+                TextField(NSLocalizedString("LOC_Y", bundle: .module, comment: "LOC_Y"), text: $YEntry)
+                TextField(NSLocalizedString("LOC_scale", bundle: .module, comment: "LOC_scale"), text: $scaleEntry)
             }
             TextEditor(text: $hint)
         }

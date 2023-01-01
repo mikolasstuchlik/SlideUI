@@ -11,7 +11,7 @@ struct PresentationHUD: View {
                 Button {
                     NSApplication.shared.makeWindowsFirstResponder()
                 } label: {
-                    Text("LOC_editing")
+                    Text(NSLocalizedString("LOC_editing", bundle: .module, comment: "LOC_editing"))
                         .foregroundColor(.red)
                         .fontWeight(.bold)
                 }
