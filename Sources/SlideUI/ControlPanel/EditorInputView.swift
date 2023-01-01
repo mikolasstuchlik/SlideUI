@@ -13,7 +13,7 @@ struct InputEditorView: View {
         } else if let selectedSlideIndex {
             SlideEditor(selectedSlideIndex: $selectedSlideIndex)
         } else {
-            Text("Vyberte snímek nebo zastávku pro úpravy")
+            Text("LOC_pick_item_to_edit")
         }
     }
 }
@@ -30,11 +30,11 @@ private struct SlideEditor: View {
 
     var body: some View {
         VStack {
-            Button("Použít") {
+            Button("LOC_apply") {
                 store(index: selectedSlideIndex)
             }
-            TextField("X", text: $XEntry)
-            TextField("Y", text: $YEntry)
+            TextField("LOC_X", text: $XEntry)
+            TextField("LOC_Y", text: $YEntry)
             TextEditor(text: $hint)
         }
         .onAppear {
@@ -90,15 +90,15 @@ private struct FocusEditor: View {
 
     var body: some View {
         VStack {
-            Button("Použít") {
+            Button("LOC_apply") {
                 store(uuid: selectedFocusUUID)
             }
-            Picker( "Druh", selection: .init(
+            Picker("LOC_type", selection: .init(
                     get: { kind.rawValue },
                     set: { kind = .init(rawValue: $0)! }
             )) {
-                Text("Volná kamera").tag(0)
-                Text("Konkrétní snímky").tag(1)
+                Text("LOC_freecam").tag(0)
+                Text("LOC_slide_focus").tag(1)
             }
             .pickerStyle(.segmented)
 
@@ -116,7 +116,7 @@ private struct FocusEditor: View {
                     }
                 }
                 Divider()
-                Menu("Přidej") {
+                Menu("LOC_add") {
                     ForEach(presentation.slides.indices) { slideIndex in
                         let name = presentation.slides[slideIndex].name
                         Button(name) {
@@ -127,9 +127,9 @@ private struct FocusEditor: View {
                     }
                 }.frame(width: 100)
             case .unbound:
-                TextField("X", text: $XEntry)
-                TextField("Y", text: $YEntry)
-                TextField("Scale", text: $scaleEntry)
+                TextField("LOC_X", text: $XEntry)
+                TextField("LOC_Y", text: $YEntry)
+                TextField("LOC_scale", text: $scaleEntry)
             }
             TextEditor(text: $hint)
         }

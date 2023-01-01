@@ -13,16 +13,16 @@ struct EditModePanel: View {
 
     var body: some View {
         GridRow {
-            Text("Code generation")
-            Button("Generate code from changes") {
+            Text("LOC_code_gen")
+            Button("LOC_generate") {
                 let slidesEditor = OffsetCodeManipulator(slidesPath: presentation.slidesPath, knowSlides: presentation.slides)
                 print(slidesEditor.saveUpdatesToSourceCode())
                 let focusEditor = FocusCodeManipulator(rootPath: presentation.rootPath, knowSlides: presentation.slides, knownFocuses: presentation.focuses)
                 print(focusEditor.saveUpdatesToSourceCode())
-            }
+            }.gridCellColumns(2)
         }
         GridRow {
-            Text("Režim")
+            Text("LOC_mode")
             Picker(
                 "",
                 selection: .init(
@@ -36,8 +36,8 @@ struct EditModePanel: View {
                     }
                 )
             ) {
-                Text("Snímky").tag(0)
-                Text("Průchod prezentací").tag(1)
+                Text("LOC_slides").tag(0)
+                Text("LOC_presentation_steps").tag(1)
             }
             .pickerStyle(.segmented)
             .gridCellColumns(2)
@@ -77,9 +77,9 @@ private struct FocusEditMode: View {
 
     var body: some View {
         GridRow {
-            Text("Průchod")
-            Button("Přidat zastávku") {
-                presentation.focuses.append(Focus(kind: .unbound(presentation.camera), hint: "Zastávka \(presentation.focuses.count)"))
+            Text("LOC_presentation_step")
+            Button("LOC_add_step") {
+                presentation.focuses.append(Focus(kind: .unbound(presentation.camera), hint: NSLocalizedString("LOC_step", bundle: .module, comment: "LOC_step") + " \(presentation.focuses.count)"))
             }
             Spacer().gridCellColumns(2)
         }

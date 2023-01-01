@@ -11,7 +11,7 @@ struct PresentationHUD: View {
                 Button {
                     NSApplication.shared.makeWindowsFirstResponder()
                 } label: {
-                    Text("Editing")
+                    Text("LOC_editing")
                         .foregroundColor(.red)
                         .fontWeight(.bold)
                 }

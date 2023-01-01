@@ -30,7 +30,7 @@ public struct SlideControlPanel: View {
                     }
                     .buttonStyle(.plain)
                     .frame(width: 50, height: 50)
-                    Button("Reload placeholders") {
+                    Button("LOC_reload_placeholders") {
                         presentation.loadThumbnails.toggle()
                     }
                 }
@@ -38,11 +38,11 @@ public struct SlideControlPanel: View {
                     Spacer()
                         .frame(maxHeight: .infinity)
                 }
-                Text("Ovládání prezentace").bold().frame(maxWidth: .infinity, alignment: .leading)
+                Text("LOC_presentation_controls").bold().frame(maxWidth: .infinity, alignment: .leading)
                 VStack {
                     Grid {
                         GridRow {
-                            Text("Režim")
+                            Text("LOC_mode")
                             Picker(
                                 "",
                                 selection: .init(
@@ -54,8 +54,8 @@ public struct SlideControlPanel: View {
                                     }
                                 )
                             ) {
-                                Text("Prezentace").tag(0)
-                                Text("Editor").tag(1)
+                                Text("LOC_presentation").tag(0)
+                                Text("LOC_editor").tag(1)
                             }
                             .pickerStyle(.segmented)
                             .gridCellColumns(2)
@@ -71,7 +71,7 @@ public struct SlideControlPanel: View {
             Divider()
             VStack(spacing: 16) {
                 if presentation.mode == .presentation {
-                    Text("Poznámky pro zaostřené").bold().frame(maxWidth: .infinity, alignment: .leading)
+                    Text("LOC_note_view").bold().frame(maxWidth: .infinity, alignment: .leading)
                     HintView()
                 } else {
                     InputEditorView(selectedFocusUUID: $selectedFocusUUID, selectedSlideIndex: $selectedSlideIndex)

@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "SlideUI",
+    defaultLocalization: "en",
     platforms: [.macOS(.v13)],
     products: [
         .library(name: "SlideUI", targets: ["SlideUI"]),
@@ -17,7 +18,11 @@ let package = Package(
     targets: [
         .executableTarget(name: "DemoSlideUI", dependencies: []),
         .target(name: "SlideUIViews", dependencies: ["CodeEditor", "SlideUICommons", "SlideUI"]),
-        .target(name: "SlideUI", dependencies: ["SlideUICommons"]),
+        .target(
+            name: "SlideUI",
+            dependencies: ["SlideUICommons"],
+            resources: [.process("Resources")]
+        ),
         .target(name: "SlideUICommons")
     ]
 )
