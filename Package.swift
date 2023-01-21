@@ -16,7 +16,6 @@ let package = Package(
         .package(url: "https://github.com/ZeeZide/CodeEditor.git", from: "1.0.0")
     ],
     targets: [
-        .executableTarget(name: "DemoSlideUI", dependencies: []),
         .target(name: "SlideUIViews", dependencies: ["CodeEditor", "SlideUICommons", "SlideUI"]),
         .target(
             name: "SlideUI",

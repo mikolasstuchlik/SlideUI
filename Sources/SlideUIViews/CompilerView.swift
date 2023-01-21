@@ -170,7 +170,7 @@ public struct CompilerView: View {
             state = .loading
             Task {
                 do {
-                    state = .view(try Providers[uniqueName].compileAndLoad(code: code))
+                    state = .view(try Providers[uniqueName].compileAndLoad(code: code, command: buildCommand))
                 } catch {
                     state = .exception(error)
                 }
