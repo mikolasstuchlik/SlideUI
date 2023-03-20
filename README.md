@@ -80,12 +80,28 @@ Do not forget to add your `Slide` (or `Background`) types to the `slides` (or `b
 ### Adding new focus
 You may add a new step to the pass through the presentation by adding new instance of `Focus` into the array `focuses` in the `App.swift`. You may either select a specific position of the camera by creating an `.unbound` focus, or focus on one (or more) slide, by creating a `.specific` focus.
 
+### Navigation
+
+The presentation has two idioms switchable in the Control Panel: `Presentation` and `Editor`. `Presentation` is used for presention and `Editor` is used by optional Code Generation included in the package. The Code Generation is an unfinished feature.
+
+Notice, that you may modify individual fonts, color scheme etc. in the Control Panel.
+
+If the `Presentation` idiom is selected, look into the bottom right corner of the presentation. There is a small presentation HUD, that allows you to go to the previous Focus by click left arrow, proceed to the next focus by clicking right arrow, go to the current focus by clicking the number between the arrows. 
+
+Additionally, there may be visible a red text "Editing...". If this is the case, the presentation expects that all keyboard and mouse inputs should be forwarded to the fields UI elements inside of the presentation. You may exit the "Editing..." mode by clicking the red text "Editing..." or by pressing the `esc` key. 
+
+If you exit the "Editing..." mode, you may proceed to next focus by clicking either `space bar` or `enter`. You may go to the previous focus by clicking `backspace`. Additionally, if you double-click the presentation, you'll enter mode called "Camera free roam."
+
+"Camera free roam" may be entered by either double-clicking when not "Editing...", or by clicking the little locked monitor icon in the bottom right corner. In this mode, you are able to move camera freely by moving cursor in the window. You are also able to change zoom using scroll gesture. You are also able to highlight a slide (highlighted slide will be decorated with red border). If you double-click in the "Camera free roam" mode, you'll either select a higlighted slide - or freeze camera at the position if no slide was highlighted.
+
 ## Examples
 
 I have updated and published my presentation which take advantage of SlideUI. Those presentations are all in Czech.
 
 [SlideUI seznámení](https://github.com/mikolasstuchlik/slides-slideui)
+
 [Sestavování projektu - Hlavičky a linkování](https://github.com/mikolasstuchlik/slides-link)
+
 [String processing a regulární výrazy](https://github.com/mikolasstuchlik/slides-string)
 
 ## Further development
