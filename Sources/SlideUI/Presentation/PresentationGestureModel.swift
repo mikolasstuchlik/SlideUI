@@ -120,7 +120,7 @@ final class PresentationGestureModel: ObservableObject {
     }
 
     private func resolveClick(event: NSEvent) {
-        guard presentation.mode == .presentation else {
+        guard NSApplication.shared.areWindowsFirstResponder else {
             return
         }
 

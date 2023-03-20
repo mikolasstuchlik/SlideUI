@@ -8,9 +8,9 @@ public final class PresentationProperties: ObservableObject {
 
     /// Current User Interaction idiom of the Application
     public enum Mode: Int, Equatable {
-        /// Presentation idiom handles user input in manner optimised for slide transition
+        /// Presentation idiom is used, when presentation is being Presented
         case presentation
-        /// Editor idiom handles the user input in manner optimised for interaction with the content of the presentation
+        /// Editor idiom is used, when the Presentation is open to modifications in Control Panel
         case editor
     }
 
