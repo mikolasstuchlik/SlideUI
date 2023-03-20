@@ -2,10 +2,14 @@ import SwiftUI
 import SlideUICommons
 import AppKit
 
+/// Presentation is a top-level view which contains the presentation itself.
 public struct Presentation: View {
     @EnvironmentObject var presentation: PresentationProperties
     @StateObject var gestureModel: PresentationGestureModel
 
+    /// Constructs the Presentation. Notice, that it accepts `environment` property. This property **must be**
+    /// also passed as an `environmentObject` and it must be the same instance as is used by the Control Panel.
+    /// - Parameter environment: Shared instance of Presentation Properties.
     public init(environment: PresentationProperties) {
         self._gestureModel = StateObject(wrappedValue: PresentationGestureModel(presentation: environment))
     }

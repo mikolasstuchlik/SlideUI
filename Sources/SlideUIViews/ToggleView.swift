@@ -1,8 +1,22 @@
 import SwiftUI
 import SlideUI
 
+/// `ToggleView` is used to temporarily hide views with high presentation cost. For example, if a view contains web-page or
+/// editor, it might be beneficial to wrap it in a toggle view, the resources needed for disaplying the content are saved.
+///
+/// Toggle view also supports thunbnails - either provided in the initializer or rendered by the `ToggleView` based on the content.
+/// Notice, that there is a hard-coded exception for `WebView` which can not automatically generate thumbnail.
+///
+/// Toggle view uses geometry reader, but only for the purposes of WebView. Maybe it would be better, to ommit the exception
+/// and refrein from using geomtery reader...
 public struct ToggleView<C: View>: View {
-    public init(@ViewBuilder content: @escaping () -> C, alignment: Alignment = .bottomTrailing, toggledOn: Bool = false, placeholder: NSImage? = nil) {
+
+    /// - Parameters:
+    ///   - alignment: Alignment of the content of the content
+    ///   - toggledOn: Whether the initial state is on or off
+    ///   - placeholder: Placeholder displayed when toggle is off
+    ///   - content: What that should be displayed when toggle is on
+    public init(alignment: Alignment = .bottomTrailing, toggledOn: Bool = false, placeholder: NSImage? = nil, @ViewBuilder content: @escaping () -> C) {
         self.content = content
         self.alignment = alignment
         self.toggledOn = toggledOn
@@ -10,11 +24,16 @@ public struct ToggleView<C: View>: View {
     }
 
     @EnvironmentObject public var presentation: PresentationProperties
-    
+
     @ViewBuilder public var content: () -> C
-    
+
+    /// Alignment of the content in the view
     public var alignment: Alignment = .bottomTrailing
+
+    /// Should display content or thumbnail
     @State public var toggledOn: Bool = false
+
+    /// Placeholder displayed when toggle is off.
     @State public var placeholder: NSImage? = nil
 
     public var body: some View {
@@ -32,7 +51,7 @@ public struct ToggleView<C: View>: View {
                         .clipped()
                         .blur(radius: 10)
                 }
-                toggleButton
+                ToggleButton(toggledOn: $toggledOn)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onChange(of: presentation.loadThumbnails) { _ in
@@ -50,25 +69,28 @@ public struct ToggleView<C: View>: View {
             }
         }
     }
-    
-    private var toggleButton: some View {
-        Button {
-            toggledOn.toggle()
-        } label: {
-            Image(
-                systemName: toggledOn
-                    ? "stop.circle.fill"
-                    : "play.circle.fill"
-            )
-            .resizable()
-            .foregroundStyle(
-                .primary,
-                .secondary,
-                toggledOn ? .red : .green
-            )
-            .frame(width: 25, height: 25)
+
+    private struct ToggleButton: View {
+        @Binding var toggledOn: Bool
+        var body: some View {
+            Button {
+                toggledOn.toggle()
+            } label: {
+                Image(
+                    systemName: toggledOn
+                        ? "stop.circle.fill"
+                        : "play.circle.fill"
+                )
+                .resizable()
+                .foregroundStyle(
+                    .primary,
+                    .secondary,
+                    toggledOn ? .red : .green
+                )
+                .frame(width: 25, height: 25)
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
     }
 }
 

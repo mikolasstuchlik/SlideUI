@@ -1,7 +1,10 @@
 import WebKit
 import SwiftUI
 
+/// `WebView` is a SwiftUI wrapper for `WKWebView`. It only accepts one URL during initialization.
 public struct WebView: NSViewRepresentable {
+
+    /// - Parameter url: URL of an WWW web page.
     public init(url: URL) {
         self.url = url
     }

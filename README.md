@@ -7,9 +7,7 @@ MUST HAVE:
  - PDF mode
 
 MUST FIX:
- - Disable double-click in editor
  - Disable double-click in unrelated window
- - Reorder the arguments so closure is always last
 
 NICE TO HAVE:
 - Add the posibility to save file from editor as executable

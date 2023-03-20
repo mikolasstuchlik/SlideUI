@@ -1,19 +1,21 @@
 import SwiftUI
 import SlideUICommons
 
-private let timeDateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.timeStyle = .medium
-    formatter.dateFormat = .none
-    return formatter
-}()
-
+/// The control panel of the presentation. Add this view to your top-level application. This view
+/// is used to manipulate various state objects of the presentation.
 public struct SlideControlPanel: View {
     public init() { }
 
+    /// Shared presentation state
     @EnvironmentObject var presentation: PresentationProperties
+
+    /// Launches the presentation window
     @Environment(\.openWindow) private var openWindow
+
+    /// Selected focus for editor mode
     @State var selectedFocusUUID: UUID?
+
+    /// Selected slide for editor mode.
     @State var selectedSlideIndex: Int?
 
     public var body: some View {

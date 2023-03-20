@@ -1,6 +1,11 @@
 import SwiftUI
 
+/// Adds a small title and a dashed border to enclosed views.
 public struct OutlineView<C: View>: View {
+
+    /// - Parameters:
+    ///   - title: Small title show above the content
+    ///   - content: Content of the outline view.
     public init(title: String, @ViewBuilder content: @escaping () -> C) {
         self.title = title
         self.content = content

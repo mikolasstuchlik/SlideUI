@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 
+/// Wraps `NSVisualEffectView` and allows to mimic the default background color of a window.
 public struct EffectView: NSViewRepresentable {
     public init(material: NSVisualEffectView.Material = .headerView, blendingMode: NSVisualEffectView.BlendingMode = .withinWindow) {
         self.material = material

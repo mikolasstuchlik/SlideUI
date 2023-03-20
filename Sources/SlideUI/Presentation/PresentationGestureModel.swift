@@ -120,6 +120,10 @@ final class PresentationGestureModel: ObservableObject {
     }
 
     private func resolveClick(event: NSEvent) {
+        guard presentation.mode == .presentation else {
+            return
+        }
+
         guard case .leftMouseDown = event.type else {
             return
         }

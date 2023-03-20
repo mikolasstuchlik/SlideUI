@@ -1,91 +1,63 @@
-import Darwin
-import Foundation
 import CodeEditor
 import SwiftUI
 import SlideUI
 
-public final class RuntimeViewProvider {
-    public enum Error: Swift.Error {
-        case failedToOpenSymbol
-    }
+/// This class is just a wrapper for already resolved views
+private final class Providers {
+    private static var providers: [String: RuntimeViewProvider] = [:]
 
-    private typealias FunctionPrototype = @convention(c) () -> Any
-
-    public static let defaultCommand = "swiftc -parse-as-library -emit-library %file%"
-    
-    public let rootViewName: String
-    public let workingURL = FileManager.default.temporaryDirectory
-    public let workingPath = FileManager.default.temporaryDirectory.path
-
-    private let symbolName = "loadViewFunc"
-    private lazy var fileTemplate: String =
-"""
-import SwiftUI
-
-@_cdecl("\(symbolName)")
-public func \(symbolName)() -> Any {
-    return AnyView(\(rootViewName).init())
-}
-
-
-"""
-
-    private var sourceFileName: String { rootViewName + ".swift" }
-    private var sourceFilePath: String { workingPath + "/" + sourceFileName}
-    private var libraryPath: String { workingPath + "/" + "lib" + rootViewName + ".dylib"}
-
-    private var existingHandle: UnsafeMutableRawPointer?
-
-    public init(rootViewName: String) {
-        self.rootViewName = rootViewName
-    }
-
-    public func compileAndLoad(code: String, command: String = RuntimeViewProvider.defaultCommand) throws -> AnyView {
-        dispose()
-        try writeFile(code: code)
-
-        let filledCommand = command.replacingOccurrences(of: "%file%", with: sourceFileName)
-        
-        _ = try Process.executeAndWait(
-            "zsh",
-            arguments: ["-c", filledCommand],
-            workingDir: workingURL
-        )
-
-        try deleteSourceFile()
-
-        let handle = dlopen(libraryPath, RTLD_NOW)!
-        existingHandle = handle
-
-        guard let symbol = dlsym(handle, symbolName) else {
-            throw Error.failedToOpenSymbol
+    static func provider(for name: String) -> RuntimeViewProvider {
+        if let provider = providers[name] {
+            return provider
         }
 
-        let callable = unsafeBitCast(symbol, to: FunctionPrototype.self)
-
-        return callable() as! AnyView
+        let provider = RuntimeViewProvider(rootViewName: name)
+        providers[name] = provider
+        return provider
     }
 
-    private func writeFile(code: String) throws {
-        let file = fileTemplate + code
-        try file.write(toFile: sourceFilePath, atomically: true, encoding: .utf8)
+    static subscript(_ name: String) -> RuntimeViewProvider {
+        return provider(for: name)
     }
 
-    private func deleteSourceFile() throws {
-        try FileManager.default.removeItem(atPath: sourceFilePath)
-    }
-
-    private func dispose() {
-        _ = existingHandle.flatMap(dlclose(_:))
-        existingHandle = nil
-        try? FileManager.default.removeItem(atPath: libraryPath)
-    }
-
-    deinit { dispose() }
+    private init () {}
 }
 
+/// Compiler view is an editor with internal logic, that allows you to compile and "plug in" a SwiftUI view into the
+/// view hiearachy of this presentation at runtime.
+///
+/// The view itself only contains the editor and some accesory, the compiled view is exposed via the `state` property.
+///
+/// The Compiler view uses `Process` in order to invoke `swiftc`. The code entered into the editor provided by
+/// Compiler view is appended after the following code:
+/// ```
+/// import SwiftUI
+///
+/// @_cdecl("\(symbolName)")
+/// public func \(symbolName)() -> Any {
+///     return AnyView(\(rootViewName).init())
+/// }
+/// ```
+/// The `symbolName` is private to the `RuntimeViewProvider` which handles the compilation, while
+/// `rootViewName` is equal to the `uniqueName` provided to the Compiler view.
+///
+/// The top-level SwiftUI view you define must have the `uniqueName`.
+///
+/// - Warning: The resulting code is compiler into a `.dylib` and loaded via `ldopen` and `dlsym`.
+/// Therefore, aby crash in the code will crash the whole presentation. Notice, that sandbox and other binary
+/// protection musts be switched off.
 public struct CompilerView: View {
-    public init(axis: CompilerView.Axis, uniqueName: String, code: Binding<String>, state: Binding<CompilerView.State>, buildCommand: Binding<String>, editBuildCommand: Bool = false) {
+
+    /// Constructs an editor and infrastructure that allows you, to enter, compile and execute a SwiftUI code
+    /// during the runtime of the presentation.
+    /// - Parameters:
+    ///   - uniqueName: The name of the UIView in your code - must be globally unique
+    ///   - code: The code to compile
+    ///   - state: Use this binding to observe the sate of the view - in case of success, the reference to compiled view will be present there
+    ///   - buildCommand: The build command used during the code compilation. Use the `%file%` delimiter in order to reference to the file for compilation. Do not change the destination.
+    ///   - editBuildCommand: Set to `true` if you want to present the input for build command modification
+    ///   - axis: Whether elements should be organized horizontally or vertically
+    public init(uniqueName: String, code: Binding<String>, state: Binding<CompilerView.State>, buildCommand: Binding<String> = .constant(RuntimeViewProvider.defaultCommand), axis: CompilerView.Axis = .vertical, editBuildCommand: Bool = false) {
         self.axis = axis
         self.uniqueName = uniqueName
         self._code = code
@@ -94,26 +66,6 @@ public struct CompilerView: View {
         self.editBuildCommand = editBuildCommand
     }
 
-    private final class Providers {
-        private static var providers: [String: RuntimeViewProvider] = [:]
-        
-        static func provider(for name: String) -> RuntimeViewProvider {
-            if let provider = providers[name] {
-                return provider
-            }
-            
-            let provider = RuntimeViewProvider(rootViewName: name)
-            providers[name] = provider
-            return provider
-        }
-        
-        static subscript(_ name: String) -> RuntimeViewProvider {
-            return provider(for: name)
-        }
-        
-        private init () {}
-    }
-    
     public enum Axis {
         case horizontal, vertical
     }
@@ -121,12 +73,23 @@ public struct CompilerView: View {
     public enum State {
         case idle, loading, exception(Error), view(AnyView)
     }
-    
+
+    /// Whether elements should be organized horizontally or vertially
     public let axis: Axis
+
+    /// The name of the UIView in your code - must be globally unique
     public let uniqueName: String
+
+    /// The code to compile
     @Binding public var code: String
+
+    /// Use this binding to observe the sate of the view - in case of success, the reference to compiled view will be present there
     @Binding public var state: State
+
+    /// The build command used during the code compilation. Use the `%file%` delimiter in order to reference to the file for compilation. Do not change the destination.
     @Binding public var buildCommand: String
+
+    /// Set to `true` if you want to present the input for build command modification
     @SwiftUI.State public var editBuildCommand: Bool = false
     
     public var body: some View {
@@ -195,6 +158,6 @@ public struct CompilerView: View {
 
 struct CompilerView_Previews: PreviewProvider {
     static var previews: some View {
-        CompilerView(axis: .vertical, uniqueName: "preview", code: .constant(""), state: .constant(.idle), buildCommand: .constant("xyz"))
+        CompilerView(uniqueName: "preview", code: .constant(""), state: .constant(.idle), buildCommand: .constant("xyz"), axis: .vertical)
     }
 }
