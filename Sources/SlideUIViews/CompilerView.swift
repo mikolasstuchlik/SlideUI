@@ -48,6 +48,52 @@ private final class Providers {
 /// protection musts be switched off.
 public struct CompilerView: View {
 
+    public enum Axis {
+        case horizontal, vertical
+    }
+
+    public enum State {
+        case idle, loading, exception(Error), view(AnyView)
+    }
+
+    public final class Model: ObservableObject {
+
+        /// The name of the UIView in your code - must be globally unique
+        public let uniqueName: String
+
+        /// The code to compile
+        @Published public var code: String
+
+        /// Use this binding to observe the sate of the view - in case of success, the reference to compiled view will be present there
+        @Published public var state: State
+
+        /// The build command used during the code compilation. Use the `%file%` delimiter in order to reference to the file for compilation. Do not change the destination.
+        @Published public var buildCommand: String
+
+        /// Set to `true` if you want to present the input for build command modification
+        @Published public var editBuildCommand: Bool = false
+
+        public init(uniqueName: String, code: String, state: CompilerView.State = .idle, buildCommand: String = RuntimeViewProvider.defaultCommand, editBuildCommand: Bool = false) {
+            self.uniqueName = uniqueName
+            self.code = code
+            self.state = state
+            self.buildCommand = buildCommand
+            self.editBuildCommand = editBuildCommand
+        }
+
+        public func execute() {
+            state = .loading
+            Task {
+                do {
+                    state = .view(try Providers[uniqueName].compileAndLoad(code: code, command: buildCommand))
+                } catch {
+                    state = .exception(error)
+                }
+            }
+        }
+    }
+
+
     /// Constructs an editor and infrastructure that allows you, to enter, compile and execute a SwiftUI code
     /// during the runtime of the presentation.
     /// - Parameters:
@@ -57,43 +103,18 @@ public struct CompilerView: View {
     ///   - buildCommand: The build command used during the code compilation. Use the `%file%` delimiter in order to reference to the file for compilation. Do not change the destination.
     ///   - editBuildCommand: Set to `true` if you want to present the input for build command modification
     ///   - axis: Whether elements should be organized horizontally or vertically
-    public init(uniqueName: String, code: Binding<String>, state: Binding<CompilerView.State>, buildCommand: Binding<String> = .constant(RuntimeViewProvider.defaultCommand), axis: CompilerView.Axis = .vertical, editBuildCommand: Bool = false) {
+    public init(model: Model, axis: CompilerView.Axis = .vertical) {
         self.axis = axis
-        self.uniqueName = uniqueName
-        self._code = code
-        self._state = state
-        self._buildCommand = buildCommand
-        self.editBuildCommand = editBuildCommand
-    }
-
-    public enum Axis {
-        case horizontal, vertical
-    }
-    
-    public enum State {
-        case idle, loading, exception(Error), view(AnyView)
+        self.model = model
     }
 
     /// Whether elements should be organized horizontally or vertially
     public let axis: Axis
 
-    /// The name of the UIView in your code - must be globally unique
-    public let uniqueName: String
+    @ObservedObject var model: Model
 
-    /// The code to compile
-    @Binding public var code: String
-
-    /// Use this binding to observe the sate of the view - in case of success, the reference to compiled view will be present there
-    @Binding public var state: State
-
-    /// The build command used during the code compilation. Use the `%file%` delimiter in order to reference to the file for compilation. Do not change the destination.
-    @Binding public var buildCommand: String
-
-    /// Set to `true` if you want to present the input for build command modification
-    @SwiftUI.State public var editBuildCommand: Bool = false
-    
     public var body: some View {
-        OutlineView(title: "SwiftUI View: \(uniqueName)") {
+        OutlineView(title: "SwiftUI View: \(model.uniqueName)") {
             if axis == .horizontal {
                 HStack { elements }
             } else {
@@ -105,18 +126,18 @@ public struct CompilerView: View {
     @ViewBuilder private var elements: some View {
         VStack {
             CodeEditor(
-                source: $code,
+                source: $model.code,
                 language: .swift,
                 theme: CodeEditor.ThemeName(rawValue: "xcode"),
                 fontSize: .constant(Font.presentationEditorFontSize),
                 indentStyle: .softTab(width: 2)
             ).colorScheme(.light)
-            if editBuildCommand {
-                TextEditor(text: $buildCommand)
+            if model.editBuildCommand {
+                TextEditor(text: $model.buildCommand)
                     .frame(height: 50)
             }
         }
-        if case .loading = state {
+        if case .loading = model.state {
             ProgressView()
                 .frame(width: 50, height: 50)
         } else {
@@ -130,14 +151,7 @@ public struct CompilerView: View {
     
     @ViewBuilder private var buttons: some View {
         Button {
-            state = .loading
-            Task {
-                do {
-                    state = .view(try Providers[uniqueName].compileAndLoad(code: code, command: buildCommand))
-                } catch {
-                    state = .exception(error)
-                }
-            }
+            model.execute()
         } label: {
             Image(systemName: "play.circle.fill")
                 .resizable()
@@ -146,7 +160,7 @@ public struct CompilerView: View {
         .frame(width: 50, height: 50)
         .buttonStyle(.plain)
         Button {
-            editBuildCommand.toggle()
+            model.editBuildCommand.toggle()
         } label: {
             Image(systemName: "terminal.fill")
                 .resizable()
@@ -158,6 +172,11 @@ public struct CompilerView: View {
 
 struct CompilerView_Previews: PreviewProvider {
     static var previews: some View {
-        CompilerView(uniqueName: "preview", code: .constant(""), state: .constant(.idle), buildCommand: .constant("xyz"), axis: .vertical)
+        CompilerView(model: CompilerView.Model(
+            uniqueName: "preview",
+            code: "",
+            state: .idle,
+            buildCommand: "xyz"
+        ))
     }
 }

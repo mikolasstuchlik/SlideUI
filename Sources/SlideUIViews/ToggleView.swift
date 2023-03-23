@@ -12,14 +12,14 @@ import SlideUI
 public struct ToggleView<C: View>: View {
 
     /// - Parameters:
+    ///   - toggledOn: Whether the initial state is on or off 
     ///   - alignment: Alignment of the content of the content
-    ///   - toggledOn: Whether the initial state is on or off
     ///   - placeholder: Placeholder displayed when toggle is off
     ///   - content: What that should be displayed when toggle is on
-    public init(alignment: Alignment = .bottomTrailing, toggledOn: Bool = false, placeholder: NSImage? = nil, @ViewBuilder content: @escaping () -> C) {
+    public init(toggledOn: Binding<Bool>, alignment: Alignment = .bottomTrailing, placeholder: NSImage? = nil, @ViewBuilder content: @escaping () -> C) {
         self.content = content
         self.alignment = alignment
-        self.toggledOn = toggledOn
+        self._toggledOn = toggledOn
         self.placeholder = placeholder
     }
 
@@ -31,7 +31,7 @@ public struct ToggleView<C: View>: View {
     public var alignment: Alignment = .bottomTrailing
 
     /// Should display content or thumbnail
-    @State public var toggledOn: Bool = false
+    @Binding public var toggledOn: Bool
 
     /// Placeholder displayed when toggle is off.
     @State public var placeholder: NSImage? = nil
@@ -96,6 +96,6 @@ public struct ToggleView<C: View>: View {
 
 struct ToggleView_Previews: PreviewProvider {
     static var previews: some View {
-        ToggleView { Text("Hello") }
+        ToggleView(toggledOn: .constant(false)) { Text("Hello") }
     }
 }

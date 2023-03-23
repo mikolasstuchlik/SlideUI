@@ -46,11 +46,11 @@ struct PresentationHUD: View {
             .frame(width: 25, height: 25)
 
             Button {
-                presentation.cameraFreeRoam.toggle()
+                presentation.enableDoubleClickFreeRoam.toggle()
             } label: {
-                Image(systemName: presentation.cameraFreeRoam ? "lock.open.display" : "lock.display")
+                Image(systemName: presentation.enableDoubleClickFreeRoam ? "lock.open.display" : "lock.display")
                     .resizable()
-                    .foregroundStyle(presentation.cameraFreeRoam ? .red : .primary)
+                    .foregroundStyle(presentation.enableDoubleClickFreeRoam ? .red : .primary)
                     .frame(width: 25, height: 25)
             }
             .buttonStyle(.plain)

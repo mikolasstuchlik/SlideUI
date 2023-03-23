@@ -7,20 +7,6 @@ import CodeEditor
 /// On background it uses provided extension on `Process` to execute `zsh` commands in working directory specified in construcor.
 public struct TerminalView: View {
 
-    /// - Parameters:
-    ///   - axis: Whether elements should be organized horizontally or vertically
-    ///   - workingPath: Working directory for each executed command
-    ///   - aspectRatio:Value 0...1 which determines what portion of the view is taken by the entry field
-    ///   - stdIn: String containing stdin
-    ///   - state: State of the execution
-    public init(workingPath: URL, stdIn: Binding<String>, state: Binding<TerminalView.State>, aspectRatio: CGFloat = 0.75, axis: TerminalView.Axis = .vertical) {
-        self.axis = axis
-        self.workingPath = workingPath
-        self.aspectRatio = aspectRatio
-        self._stdIn = stdIn
-        self._state = state
-    }
-
     public enum Axis {
         case horizontal, vertical
     }
@@ -29,23 +15,55 @@ public struct TerminalView: View {
         case idle, loading, result(Result<String?, Error>)
     }
 
+    public final class Model: ObservableObject {
+
+        /// String containing current value passed to zsh
+        @Published public var stdIn: String
+
+        /// State of the execution
+        @Published public var state: State
+
+        /// Working directory for each executed command
+        public let workingPath: URL
+
+        public init(workingPath: URL, stdIn: String, state: State = .idle) {
+            self.stdIn = stdIn
+            self.state = state
+            self.workingPath = workingPath
+        }
+
+        public func execute() {
+            state = .loading
+            Task { @MainActor in
+                state = .result(Result {
+                    try Process.executeAndWait("zsh", arguments: ["-c", stdIn], workingDir: workingPath)
+                })
+            }
+        }
+    }
+
+    /// - Parameters:
+    ///   - axis: Whether elements should be organized horizontally or vertically
+    ///   - workingPath: Working directory for each executed command
+    ///   - aspectRatio:Value 0...1 which determines what portion of the view is taken by the entry field
+    ///   - stdIn: String containing stdin
+    ///   - state: State of the execution
+    public init(model: Model, aspectRatio: CGFloat = 0.75, axis: TerminalView.Axis = .vertical) {
+        self.axis = axis
+        self.aspectRatio = aspectRatio
+        self.model = model
+    }
+
     /// Whether elements should be organized horizontally or vertially
     public let axis: Axis
-
-    /// Working directory for each executed command
-    public let workingPath: URL
 
     /// Value 0...1 which determines what portion of the view is taken by the entry field
     public let aspectRatio: CGFloat
 
-    /// String containing current value passed to zsh
-    @Binding public var stdIn: String
+    @ObservedObject var model: Model
 
-    /// State of the execution
-    @Binding public var state: State
-    
     public var body: some View {
-        OutlineView(title: "zsh in:\(workingPath.path) %") {
+        OutlineView(title: "zsh in:\(model.workingPath.path) %") {
             HStack {
                 GeometryReader { proxy in
                     VStack(spacing: 4.0) {
@@ -56,7 +74,7 @@ public struct TerminalView: View {
                                 .font(.system(.footnote))
                                 .frame(maxWidth: .infinity, maxHeight: 12, alignment: .leading)
                             CodeEditor(
-                                source: $stdIn,
+                                source: $model.stdIn,
                                 language: .bash,
                                 fontSize: .constant(Font.presentationEditorFontSize),
                                 indentStyle: .softTab(width: 2),
@@ -66,10 +84,10 @@ public struct TerminalView: View {
                             height: baseHeight * aspectRatio
                         )
                         if axis == .vertical {
-                            ButtonView(workingPath: workingPath, stdIn: $stdIn, state: $state)
+                            ButtonView(model: model)
                         }
                         ScrollView {
-                            switch state {
+                            switch model.state {
                             case .idle, .loading:
                                 Text("stdout:")
                                     .foregroundColor(.gray)
@@ -110,29 +128,22 @@ public struct TerminalView: View {
                     }
                 }
                 if axis == .horizontal {
-                    ButtonView(workingPath: workingPath, stdIn: $stdIn, state: $state)
+                    ButtonView(model: model)
                 }
             }
         }
     }
 
     private struct ButtonView: View {
-        public let workingPath: URL
-        @Binding public var stdIn: String
-        @Binding public var state: State
+        @ObservedObject var model: Model
 
         var body: some View {
-            if case .loading = state {
+            if case .loading = model.state {
                 ProgressView()
                     .frame(width: 50, height: 50)
             } else {
                 Button {
-                    state = .loading
-                    Task {
-                        state = .result(Result {
-                            try Process.executeAndWait("zsh", arguments: ["-c", stdIn], workingDir: workingPath)
-                        })
-                    }
+                    model.execute()
                 } label: {
                     Image(systemName: "play.circle.fill")
                         .resizable()
@@ -147,6 +158,14 @@ public struct TerminalView: View {
 
 struct TerminalView_Previews: PreviewProvider {
     static var previews: some View {
-        TerminalView(workingPath: FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0], stdIn: .constant(""), state: .constant(.idle), aspectRatio: 0.25, axis: .vertical)
+        TerminalView(
+            model: TerminalView.Model(
+                workingPath: FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0],
+                stdIn: "",
+                state: .idle
+            ),
+            aspectRatio: 0.25,
+            axis: .vertical
+        )
     }
 }

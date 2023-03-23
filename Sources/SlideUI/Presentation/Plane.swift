@@ -15,9 +15,7 @@ struct Plane: View {
     }
 
     private func content(for background: any Background.Type) -> some View {
-        AnyView(
-            background.init()
-        )
+        AnyView(background.init())
         .frame(
             width: presentation.screenSize.width * background.relativeSize.width,
             height: presentation.screenSize.height * background.relativeSize.height
@@ -29,23 +27,17 @@ struct Plane: View {
         )
     }
 
-    private func content(for slide: any Slide.Type) -> AnyView {
-        var slideView: any View = slide.init()
-        if presentation.hoveredSlide == slide {
-            slideView = slideView.border(Color.red, width: 4)
-        }
-        return AnyView(
-            slideView
-                .frame(
-                    width: presentation.frameSize.width,
-                    height: presentation.frameSize.height
-                )
-                .offset(
-                    x: presentation.screenSize.width * slide.offset.dx,
-                    y: presentation.screenSize.height * slide.offset.dy
-                )
-                .disabled(presentation.mode == .editor)
-        )
+    private func content(for slide: any Slide.Type) -> some View {
+        AnyView(slide.init())
+            .frame(
+                width: presentation.frameSize.width,
+                height: presentation.frameSize.height
+            )
+            .offset(
+                x: presentation.screenSize.width * slide.offset.dx,
+                y: presentation.screenSize.height * slide.offset.dy
+            )
+            .disabled(presentation.mode == .editor)
+            .`if`(presentation.hoveredSlide == slide) { $0.border(Color.red, width: 4) }
     }
 }
-

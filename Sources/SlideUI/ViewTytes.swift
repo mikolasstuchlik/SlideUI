@@ -13,8 +13,24 @@ public protocol Background: View {
     init()
 }
 
+public typealias SlideID = String
+
+public protocol ForwardEventCapturingState: ObservableObject {
+    static var stateSingleton: Self { get }
+
+    func captured(forwardEvent number: UInt ) -> Bool
+}
+
+public final class NoCapturingState: ForwardEventCapturingState {
+    public static let stateSingleton: NoCapturingState = .init()
+    init() {}
+    public func captured(forwardEvent number: UInt) -> Bool { false }
+}
+
 /// SlideUI Slide describing a frame of the presentation
 public protocol Slide: View {
+    associatedtype ExposedState: ForwardEventCapturingState = NoCapturingState
+
     /// Offset of the slide in multiples of frame size from point [0, 0]
     static var offset: CGVector { get set }
     /// Preferred scale ("zoom") of the Camera when this slide is in single focus.
@@ -22,14 +38,20 @@ public protocol Slide: View {
     /// Hint related to this slide.
     static var hint: String? { get set }
     /// Globally unique name of this slide (provided default implementation).
-    static var name: String { get }
+    static var name: SlideID { get }
+
+    static func captured(forwardEvent number: UInt ) -> Bool
 
     init()
 }
 
 public extension Slide {
-    static var name: String { String(describing: Self.self) }
+    static var name: SlideID { String(describing: Self.self) }
     static var singleFocusScale: CGFloat { 0.9999 } // When scale is 1.0, some shapes disappear :shurug:
 
-    var name: String { Self.name }
+    var name: SlideID { Self.name }
+
+    static func captured(forwardEvent number: UInt ) -> Bool {
+        ExposedState.stateSingleton.captured(forwardEvent: number)
+    }
 }

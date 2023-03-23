@@ -120,7 +120,11 @@ final class PresentationGestureModel: ObservableObject {
     }
 
     private func resolveClick(event: NSEvent) {
-        guard NSApplication.shared.areWindowsFirstResponder else {
+        // We don't want to enter free roam if presentation is locked or user is in unput mode
+        guard
+            NSApplication.shared.areWindowsFirstResponder,
+            presentation.enableDoubleClickFreeRoam
+        else {
             return
         }
 
@@ -207,6 +211,9 @@ final class PresentationGestureModel: ObservableObject {
 
         switch event.keyCode {
         case 49 /* Space bar*/, 36 /* enter */:
+            guard presentation.shouldProceedToNextFocus() else {
+                return true
+            }
             presentation.selectedFocus += 1
         case 51 /* Back space */:
             presentation.selectedFocus -= 1
@@ -220,13 +227,18 @@ final class PresentationGestureModel: ObservableObject {
     private func resolveResponder(event: NSEvent) -> Bool {
         guard
             event.type == .keyDown,
-            event.keyCode == 53 /* escape */,
-            !NSApplication.shared.areWindowsFirstResponder
+            event.keyCode == 53 /* escape */
         else {
             return false
         }
 
-        NSApplication.shared.makeWindowsFirstResponder()
+        if !NSApplication.shared.areWindowsFirstResponder {
+            NSApplication.shared.makeWindowsFirstResponder()
+        } else if presentation.cameraFreeRoam {
+            presentation.cameraFreeRoam.toggle()
+        } else {
+            return false
+        }
 
         return true
     }

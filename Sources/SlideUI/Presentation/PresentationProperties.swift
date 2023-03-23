@@ -34,9 +34,12 @@ public final class PresentationProperties: ObservableObject {
         self.focuses = focuses
     }
 
+    private var currentSlideStateUpdates: UInt = 0
+
     /// Currently selected focus.
     public var selectedFocus: Int = 0 {
         didSet {
+            currentSlideStateUpdates = 0
             if let newConfiguration = getConfiguration(for: selectedFocus) {
                 camera = newConfiguration.camera
                 hint = newConfiguration.hint
@@ -52,6 +55,20 @@ public final class PresentationProperties: ObservableObject {
         hint = slide.hint
     }
 
+    func shouldProceedToNextFocus() -> Bool {
+        guard
+            focuses.indices.contains(selectedFocus),
+            case let .specific(slides) = focuses[selectedFocus].kind,
+            slides.count == 1,
+            let slide = slides.first
+        else {
+            return true
+        }
+
+        defer { currentSlideStateUpdates += 1 }
+        return !slide.captured(forwardEvent: currentSlideStateUpdates)
+    }
+
     /// The path to the root of the Application source code. It is used by the code generator.
     public let rootPath: String
     /// Path to the directory containing slides.
@@ -65,6 +82,8 @@ public final class PresentationProperties: ObservableObject {
 
     /// Current user input idiom.
     @Published public var mode: Mode = .presentation
+    /// Whether camera can move freely using the position of cursor and wheel.
+    @Published public var enableDoubleClickFreeRoam: Bool = false
     /// Whether camera can move freely using the position of cursor and wheel.
     @Published public var cameraFreeRoam: Bool = false
     /// Slide, that is hovered during camera free roam.

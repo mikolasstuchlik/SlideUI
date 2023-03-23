@@ -113,7 +113,6 @@ I will appreciate any help with the development and accept any reasonable Pull R
 There is a list of currently tracked issues and feature ideas.
 
 MUST HAVE:
- - System for forward-click actions
  - PDF mode
 
 MUST FIX:
