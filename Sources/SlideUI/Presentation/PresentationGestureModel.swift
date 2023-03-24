@@ -210,15 +210,9 @@ final class PresentationGestureModel: ObservableObject {
         }
 
         switch event.keyCode {
-        case 49 /* Space bar*/, 36 /* enter */:
-            guard presentation.shouldProceedToNextFocus() else {
-                return true
-            }
-            presentation.selectedFocus += 1
-        case 51 /* Back space */:
-            presentation.selectedFocus -= 1
-        default:
-            return false
+        case 49 /* Space bar*/, 36 /* enter */: presentation.handleMoveForwardEvent()
+        case 51 /* Back space */: presentation.handleMoveBackwardEvent()
+        default: return false
         }
 
         return true

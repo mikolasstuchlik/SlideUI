@@ -49,26 +49,6 @@ public final class PresentationProperties: ObservableObject {
         }
     }
 
-    /// Allows you to select a concrete slide.
-    public func moveTo(slide: any Slide.Type) {
-        camera = .init(offset: slide.offset, scale: slide.singleFocusScale)
-        hint = slide.hint
-    }
-
-    func shouldProceedToNextFocus() -> Bool {
-        guard
-            focuses.indices.contains(selectedFocus),
-            case let .specific(slides) = focuses[selectedFocus].kind,
-            slides.count == 1,
-            let slide = slides.first
-        else {
-            return true
-        }
-
-        defer { currentSlideStateUpdates += 1 }
-        return !slide.captured(forwardEvent: currentSlideStateUpdates)
-    }
-
     /// The path to the root of the Application source code. It is used by the code generator.
     public let rootPath: String
     /// Path to the directory containing slides.
@@ -173,6 +153,37 @@ public final class PresentationProperties: ObservableObject {
             Font.presentationEditorFont = Font.system(size: newValue)
             Font.presentationEditorFontSize = newValue
         }
+    }
+
+    /// Allows you to select a concrete slide.
+    public func moveTo(slide: any Slide.Type) {
+        camera = .init(offset: slide.offset, scale: slide.singleFocusScale)
+        hint = slide.hint
+    }
+
+    public func handleMoveForwardEvent() {
+        guard shouldProceedToNextFocus() else {
+            return
+        }
+        selectedFocus += 1
+    }
+
+    public func handleMoveBackwardEvent() {
+        selectedFocus -= 1
+    }
+
+    private func shouldProceedToNextFocus() -> Bool {
+        guard
+            focuses.indices.contains(selectedFocus),
+            case let .specific(slides) = focuses[selectedFocus].kind,
+            slides.count == 1,
+            let slide = slides.first
+        else {
+            return true
+        }
+
+        defer { currentSlideStateUpdates += 1 }
+        return !slide.captured(forwardEvent: currentSlideStateUpdates)
     }
 
     private func getConfiguration(for newFocusIndex: Int) -> PresentableFocus? {

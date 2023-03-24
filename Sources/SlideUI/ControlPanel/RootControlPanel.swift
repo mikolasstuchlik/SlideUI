@@ -3,8 +3,10 @@ import SlideUICommons
 
 /// The control panel of the presentation. Add this view to your top-level application. This view
 /// is used to manipulate various state objects of the presentation.
-public struct SlideControlPanel: View {
-    public init() { }
+public struct SlideControlPanel<Accessory: View>: View {
+    public init(@ViewBuilder accessory: @escaping () -> Accessory = { () -> EmptyView in EmptyView() }) {
+        self.accessory = accessory
+    }
 
     /// Shared presentation state
     @EnvironmentObject var presentation: PresentationProperties
@@ -17,6 +19,8 @@ public struct SlideControlPanel: View {
 
     /// Selected slide for editor mode.
     @State var selectedSlideIndex: Int?
+
+    @ViewBuilder private var accessory: () -> Accessory
 
     public var body: some View {
         HStack(spacing: 16) {
@@ -78,6 +82,7 @@ public struct SlideControlPanel: View {
                 } else {
                     InputEditorView(selectedFocusUUID: $selectedFocusUUID, selectedSlideIndex: $selectedSlideIndex)
                 }
+                accessory()
             }
         }.padding()
     }
