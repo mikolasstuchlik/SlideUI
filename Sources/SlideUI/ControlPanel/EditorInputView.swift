@@ -8,9 +8,9 @@ struct InputEditorView: View {
     @Binding var selectedSlideIndex: Int?
 
     var body: some View {
-        if let selectedFocusUUID {
+        if selectedFocusUUID != nil {
             FocusEditor(selectedFocusUUID: $selectedFocusUUID)
-        } else if let selectedSlideIndex {
+        } else if selectedSlideIndex != nil {
             SlideEditor(selectedSlideIndex: $selectedSlideIndex)
         } else {
             Text(NSLocalizedString("LOC_pick_item_to_edit", bundle: .module, comment: "LOC_pick_item_to_edit"))

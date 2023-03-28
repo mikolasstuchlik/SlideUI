@@ -13,14 +13,24 @@ public protocol Background: View {
     init()
 }
 
+/// Type identyfying the slide
 public typealias SlideID = String
 
+/// Protocol which describes `ObservableObjects` that allow to consume a forward event.
 public protocol ForwardEventCapturingState: ObservableObject {
+    /// Each type has only 1 valid instance of the state which should be stored in this property
     static var stateSingleton: Self { get }
 
+    /// If the selected focus is of the `.specific` kind, and there is only 1 slide,
+    /// the presentation invokes this function to provide the slide with ability to consume
+    /// the "next slide" event.
+    /// - Parameter number: The number of "next slide" events consumed by this slide.
+    /// - Returns: `true` if Slide consumed the event, `false` is default
     func captured(forwardEvent number: UInt ) -> Bool
 }
 
+/// Default implementation of `ForwardEventCapturingState`, that retains no state and
+/// captures no events.
 public final class NoCapturingState: ForwardEventCapturingState {
     public static let stateSingleton: NoCapturingState = .init()
     init() {}
@@ -29,6 +39,8 @@ public final class NoCapturingState: ForwardEventCapturingState {
 
 /// SlideUI Slide describing a frame of the presentation
 public protocol Slide: View {
+    /// Exposed state is a type of `StateObject`, that allows to capture "forward" input to change slide and prevent
+    /// presentation from proceeding to the next Slide
     associatedtype ExposedState: ForwardEventCapturingState = NoCapturingState
 
     /// Offset of the slide in multiples of frame size from point [0, 0]
@@ -40,6 +52,11 @@ public protocol Slide: View {
     /// Globally unique name of this slide (provided default implementation).
     static var name: SlideID { get }
 
+    /// If the selected focus is of the `.specific` kind, and there is only 1 slide,
+    /// the presentation invokes this function to provide the slide with ability to consume
+    /// the "next slide" event.
+    /// - Parameter number: The number of "next slide" events consumed by this slide.
+    /// - Returns: `true` if Slide consumed the event, `false` is default
     static func captured(forwardEvent number: UInt ) -> Bool
 
     init()

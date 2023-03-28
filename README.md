@@ -43,7 +43,7 @@ If your presentation contains some instances of `SwitchView`, you may want to ge
 
 ## Usage
 
-### Important types
+### Overview - important types
 The three most important types of the `SlideUI` are `Slide`, `Background` and `Focus`. All `Slide` views have equal size.
  - `Slide` is a type of `SwiftUI.View`, that is used to create a slide in our presentation.
  - `Background` is a type of `SwiftUI.View`, that is optimized for decorating your presentation with additional resources like shapes, images etc. Unlike `Slide`, a `Background` allows you to create the view as big or small as you want.
@@ -80,19 +80,49 @@ Do not forget to add your `Slide` (or `Background`) types to the `slides` (or `b
 ### Adding new focus
 You may add a new step to the pass through the presentation by adding new instance of `Focus` into the array `focuses` in the `App.swift`. You may either select a specific position of the camera by creating an `.unbound` focus, or focus on one (or more) slide, by creating a `.specific` focus.
 
-### Navigation
+### Execution checklist
+When running the presentation, follow recommended checklist
 
-The presentation has two idioms switchable in the Control Panel: `Presentation` and `Editor`. `Presentation` is used for presention and `Editor` is used by optional Code Generation included in the package. The Code Generation is an unfinished feature.
+  - Run the application 
+  - Window with "Control Panel" opens
+  - Click on the greep "Play" button to run the slides
+  - Window with "Presentation" opens
+  - Resize the "Presentation" window to it's correct size
+  - In "Control Panel" window hit "Reload Previews" button next to "Play" button (this generates thumbnails for Toggle views)
+  - Go to "Presentation" window and hit "esc" key, so the First Responders are resseted (I'm unable to reset First Responder `onAppear`)
+  - Now the app is in "Presentation" mode and "forward" and "backward" events are available
 
-Notice, that you may modify individual fonts, color scheme etc. in the Control Panel.
+### User input modes overview
 
-If the `Presentation` idiom is selected, look into the bottom right corner of the presentation. There is a small presentation HUD, that allows you to go to the previous Focus by click left arrow, proceed to the next focus by clicking right arrow, go to the current focus by clicking the number between the arrows. 
+The presentation has following modes wich can be in effect simultaneously:
 
-Additionally, there may be visible a red text "Editing...". If this is the case, the presentation expects that all keyboard and mouse inputs should be forwarded to the fields UI elements inside of the presentation. You may exit the "Editing..." mode by clicking the red text "Editing..." or by pressing the `esc` key. 
+ - "Presentation" and "Editor" mode
+ - "Editing..." and "Non-Editing" mode
+ - "Camera free roam" and "Fixed camera" mode
+ 
+#### "Presentation" and "Editor" mode
+Switched by segmented control in the "Control Panel" window. Allows you to change the purpose of the application.
 
-If you exit the "Editing..." mode, you may proceed to next focus by clicking either `space bar` or `enter`. You may go to the previous focus by clicking `backspace`. Additionally, if you double-click the presentation, you'll enter mode called "Camera free roam."
+ - "Presentation" mode (default) optimized for running the slides.
+ - "Editor" mode is an experimental mode, that allows you to rearrange the order, delete and add Focuses. The editor mode also allows you to edit Hints, emmit generated code from the current runtime state and move slides by using cursor in "Camera free roam" mode. Notice, that "Editor" mode suffers from **significant** performance issues.
+ 
+#### "Editing..." and "Non-Editing" mode
+Controls the event capture engine of the presentations. Captured events are following
+ 
+ - Space bar and Enter -> Forward gesture (moves focus forward)
+ - Backspace -> Backward gesture (moves focus backward)
+ - Esc -> Ends user input
+ 
+The "Editing..." mode is state, when the *First Responder* is *not* the window itself - meaning, some button or text field are in the *First Responder* state. If the "Editing..." mode is active, all input (except for hitting the Esc key) is forwarded to the current *First Responder*.
 
-"Camera free roam" may be entered by either double-clicking when not "Editing...", or by clicking the little locked monitor icon in the bottom right corner. In this mode, you are able to move camera freely by moving cursor in the window. You are also able to change zoom using scroll gesture. You are also able to highlight a slide (highlighted slide will be decorated with red border). If you double-click in the "Camera free roam" mode, you'll either select a higlighted slide - or freeze camera at the position if no slide was highlighted.
+The "Editing..." mode is active, when there is a text `"Editing..."` in the right-bottom corner of the "Presentation" window.
+
+#### "Camera free roam" and "Fixed camera" mode
+"Camera free roam" is a mode, when moving the cursor towards the edges of the "Presentation" window also move the camera. Scroll wheel events also change the focus. Notice, that this mode has **significant** performance issues. 
+
+The "Camera free roam" is not available, unless you click the "icon with lock" in the bottom right corner of the "Presentation" window. If the icon is red, the "Camera free roam" mode can be entered via "double-click". 
+
+The "Camera free roam" mode can be exitted either by hitting "Esc", or double-clicking. If a Slide of hit when "Camera free roam" mode was exitted, the Slide will be focused.
 
 ## Examples
 
@@ -113,14 +143,17 @@ I will appreciate any help with the development and accept any reasonable Pull R
 There is a list of currently tracked issues and feature ideas.
 
 MUST HAVE:
+ - Refactor problematic feautres (editor, free cam, ...) and remove unneeded features
  - PDF mode
 
 MUST FIX:
  - Disable double-click in unrelated window
 
 NICE TO HAVE:
-- Add the posibility to save file from editor as executable
-- Optimize input fields for numbers
+ - Add the posibility to save file from editor as executable
+ - Optimize input fields for numbers
+ - Separate `SlideVaporized` module to a different repository
+ - Separate `SlideUIViews` module to a different repository
 
 FIX:
 - Fix freecam edge-scroll performance hit
@@ -128,3 +161,7 @@ FIX:
 - Fix freecam movement when moving a slide in editor mode
 - Fix performance degradation in editor mode
 - Investigate strange scrolling behavior of editor
+
+Future Directions:
+ - Use declaration and expression macros instead of immutable arrays (Or runtime reflection metadata)
+ - Provide API to render shapes into images and save resources.
