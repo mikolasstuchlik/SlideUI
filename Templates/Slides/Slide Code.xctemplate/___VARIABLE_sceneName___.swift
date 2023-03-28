@@ -27,9 +27,36 @@ print("Hello world")
         "swiftc ___VARIABLE_codeName___.swift && ./___VARIABLE_codeName___"
     ]
 
-    @State var content: String = ___VARIABLE_sceneName___.defaultCode
-    @State var state: TerminalView.State = .idle
-    @State var stdin: String = ___VARIABLE_sceneName___.defaultStdIn[0]
+    public final class ExposedState: ForwardEventCapturingState {
+        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .init()
+
+        @Published var execCode: TextEditorView.Model = .init(
+            filePath: FileCoordinator.shared.pathToFolder(for: "code") + "/___VARIABLE_codeName___.swift",
+            format: .swift,
+            content: ___VARIABLE_sceneName___.defaultCode
+        )
+        @Published var terminal: TerminalView.Model = .init(
+            workingPath: URL(fileURLWithPath: FileCoordinator.shared.pathToFolder(for: "code")),
+            stdIn: ___VARIABLE_sceneName___.defaultStdIn[0]
+        )
+        @Published var toggle: Bool = false
+
+        public func captured(forwardEvent number: UInt) -> Bool {
+            switch number {
+            case 0:
+                withAnimation { toggle.toggle() }
+            case 1:
+                execCode.save()
+                terminal.execute()
+            case 2:
+                withAnimation { toggle.toggle() }
+            default:
+                return false
+            }
+            return true
+        }
+    }
+    @ObservedObject private var state: ExposedState = ExposedState.stateSingleton
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
@@ -42,21 +69,10 @@ print("Hello world")
 Body
 """
             ).font(.presentationBody).frame(maxWidth: .infinity, alignment: .topLeading)
-            ToggleView {
+            ToggleView(toggledOn: $state.toggle) {
                 VStack {
-                    TextEditorView(
-                        axis: .vertical,
-                        filePath: FileCoordinator.shared.pathToFolder(for: "code") + "/___VARIABLE_codeName___.swift",
-                        format: .constant(.swift),
-                        content: $content
-                    )
-                    TerminalView(
-                        axis: .horizontal,
-                        workingPath: URL(fileURLWithPath: FileCoordinator.shared.pathToFolder(for: "code")),
-                        aspectRatio: 0.25,
-                        stdIn: $stdin,
-                        state: $state
-                    ).frame(height: 200)
+                    TextEditorView(model: state.execCode)
+                    TerminalView(model: state.terminal, aspectRatio: 0.35, axis: .horizontal).frame(height: 200)
                 }
             }
         }.padding()

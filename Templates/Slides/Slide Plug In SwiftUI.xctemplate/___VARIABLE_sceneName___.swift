@@ -24,9 +24,27 @@ struct ___VARIABLE_viewName___: View {
 
 """
 
-    @State var code: String = ___VARIABLE_sceneName___.defaultCode
-    @State var buildCommand: String = RuntimeViewProvider.defaultCommand
-    @State var state: CompilerView.State = .idle
+    public final class ExposedState: ForwardEventCapturingState {
+        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .init()
+
+        @Published var toggle: Bool = false
+
+        public func captured(forwardEvent number: UInt) -> Bool {
+            switch number {
+            case 0:
+                withAnimation { toggle.toggle() }
+            case 1:
+                withAnimation { toggle.toggle() }
+            default:
+                return false
+            }
+            return true
+        }
+    }
+    @ObservedObject private var state: ExposedState = ExposedState.stateSingleton
+
+    // It was observed, that view fails to update state if `compiler` SO is inside of ExposedState...
+    @StateObject var compiler: CompilerView.Model = .init(uniqueName: "___VARIABLE_viewName___", code: ___VARIABLE_sceneName___.defaultCode)
 
     init() {}
 
@@ -36,16 +54,10 @@ struct ___VARIABLE_viewName___: View {
                 Text("Headline").font(.presentationHeadline)
                 Text("Subheadline").font(.presentationSubHeadline)
             }
-            ToggleView {
+            ToggleView(toggledOn: $state.toggle) {
                 HStack {
-                    CompilerView(
-                        axis: .horizontal,
-                        uniqueName: "___VARIABLE_viewName___",
-                        code: $code,
-                        state: $state,
-                        buildCommand: $buildCommand
-                    )
-                    switch state {
+                    CompilerView(model: compiler, axis: .horizontal)
+                    switch compiler.state {
                     case let .exception(ProcessError.endedWith(code: code, error: message)):
                         Text("Process ended with code \(code). Message: \(message ?? "")").foregroundColor(.red).monospaced()
                     case .exception(let error):

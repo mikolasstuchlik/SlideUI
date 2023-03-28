@@ -14,6 +14,25 @@ struct ___VARIABLE_sceneName___: Slide {
 """
     // }@hint(___VARIABLE_sceneName___)
 
+    public final class ExposedState: ForwardEventCapturingState {
+        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .init()
+
+        @Published var toggle: Bool = false
+
+        public func captured(forwardEvent number: UInt) -> Bool {
+            switch number {
+            case 0:
+                toggle.toggle()
+            case 1:
+                toggle.toggle()
+            default:
+                return false
+            }
+            return true
+        }
+    }
+    @ObservedObject private var state: ExposedState = ExposedState.stateSingleton
+
     init() {}
 
     var body: some View {
@@ -22,7 +41,7 @@ struct ___VARIABLE_sceneName___: Slide {
                 Text("Headline").font(.presentationHeadline)
                 Text("Subheadline").font(.presentationSubHeadline)
             }
-            ToggleView {
+            ToggleView(toggledOn: $state.toggle) {
                 WebView(url: URL(string: "https://apple.com")!)
             }
         }.padding()
