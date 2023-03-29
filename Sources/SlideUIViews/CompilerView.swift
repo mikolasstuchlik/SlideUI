@@ -83,7 +83,7 @@ public struct CompilerView: View {
 
         public func execute() {
             state = .loading
-            Task {
+            Task { @MainActor in
                 do {
                     state = .view(try Providers[uniqueName].compileAndLoad(code: code, command: buildCommand))
                 } catch {
