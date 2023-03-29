@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// SwiftUI View describing a background.
 public protocol Background: View {
