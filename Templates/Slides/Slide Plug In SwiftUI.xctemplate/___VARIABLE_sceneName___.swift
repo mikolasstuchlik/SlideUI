@@ -25,7 +25,9 @@ struct ___VARIABLE_viewName___: View {
 """
 
     public final class ExposedState: ForwardEventCapturingState {
-        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .init()
+        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .makeSingleton()
+
+        var compiler: CompilerView.Model = .init(uniqueName: "___VARIABLE_viewName___", code: ___VARIABLE_sceneName___.defaultCode)
 
         @Published var toggle: Bool = false
 
@@ -41,10 +43,7 @@ struct ___VARIABLE_viewName___: View {
             return true
         }
     }
-    @ObservedObject private var state: ExposedState = ExposedState.stateSingleton
-
-    // It was observed, that view fails to update state if `compiler` SO is inside of ExposedState...
-    @StateObject var compiler: CompilerView.Model = .init(uniqueName: "___VARIABLE_viewName___", code: ___VARIABLE_sceneName___.defaultCode)
+    @StateObject private var state: ExposedState = ExposedState.stateSingleton
 
     init() {}
 

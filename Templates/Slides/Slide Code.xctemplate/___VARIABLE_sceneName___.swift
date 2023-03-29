@@ -28,14 +28,14 @@ print("Hello world")
     ]
 
     public final class ExposedState: ForwardEventCapturingState {
-        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .init()
+        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .makeSingleton()
 
-        @Published var execCode: TextEditorView.Model = .init(
+        var execCode: TextEditorView.Model = .init(
             filePath: FileCoordinator.shared.pathToFolder(for: "code") + "/___VARIABLE_codeName___.swift",
             format: .swift,
             content: ___VARIABLE_sceneName___.defaultCode
         )
-        @Published var terminal: TerminalView.Model = .init(
+        var terminal: TerminalView.Model = .init(
             workingPath: URL(fileURLWithPath: FileCoordinator.shared.pathToFolder(for: "code")),
             stdIn: ___VARIABLE_sceneName___.defaultStdIn[0]
         )
@@ -56,7 +56,7 @@ print("Hello world")
             return true
         }
     }
-    @ObservedObject private var state: ExposedState = ExposedState.stateSingleton
+    @StateObject private var state: ExposedState = ExposedState.stateSingleton
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {

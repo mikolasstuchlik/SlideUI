@@ -15,7 +15,7 @@ struct ___VARIABLE_sceneName___: Slide {
     // }@hint(___VARIABLE_sceneName___)
 
     public final class ExposedState: ForwardEventCapturingState {
-        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .init()
+        public static var stateSingleton: ___VARIABLE_sceneName___.ExposedState = .makeSingleton()
 
         @Published var toggle: Bool = false
 
@@ -31,7 +31,7 @@ struct ___VARIABLE_sceneName___: Slide {
             return true
         }
     }
-    @ObservedObject private var state: ExposedState = ExposedState.stateSingleton
+    @StateObject private var state: ExposedState = ExposedState.stateSingleton
 
     init() {}
 

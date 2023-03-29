@@ -20,6 +20,10 @@ public typealias SlideID = String
 public protocol ForwardEventCapturingState: ObservableObject {
     /// Each type has only 1 valid instance of the state which should be stored in this property
     static var stateSingleton: Self { get }
+    /// Use this factory method to intialize singleton. It sets up chain of event from inner ObservableObject.
+    static func makeSingleton() -> Self
+
+    init()
 
     /// If the selected focus is of the `.specific` kind, and there is only 1 slide,
     /// the presentation invokes this function to provide the slide with ability to consume
@@ -27,13 +31,52 @@ public protocol ForwardEventCapturingState: ObservableObject {
     /// - Parameter number: The number of "next slide" events consumed by this slide.
     /// - Returns: `true` if Slide consumed the event, `false` is default
     func captured(forwardEvent number: UInt ) -> Bool
+
+    /// Sets up chain of event from inner ObservableObject.
+    func hookObjectWillChange()
+}
+
+private var willChangeCancellables: Set<AnyCancellable> = []
+
+private extension ObservableObject {
+    func hookWillChange(handler: @escaping () -> Void) {
+        guard let publisher = objectWillChange as? ObservableObjectPublisher else {
+            return
+        }
+
+        publisher.sink { _ in
+            handler()
+        }.store(in: &willChangeCancellables)
+    }
+}
+
+public extension ForwardEventCapturingState where Self.ObjectWillChangePublisher: ObservableObjectPublisher {
+    static func makeSingleton() -> Self {
+        let aSelf = Self.init()
+        aSelf.hookObjectWillChange()
+        return aSelf
+    }
+
+
+    func hookObjectWillChange() {
+        let mirror = Mirror(reflecting: self)
+        mirror.children.forEach { child in
+            guard let element = child.value as? any ObservableObject else {
+                return
+            }
+
+            element.hookWillChange { [unowned self] in
+                self.objectWillChange.send()
+            }
+        }
+    }
 }
 
 /// Default implementation of `ForwardEventCapturingState`, that retains no state and
 /// captures no events.
 public final class NoCapturingState: ForwardEventCapturingState {
     public static let stateSingleton: NoCapturingState = .init()
-    init() {}
+    public init() {}
     public func captured(forwardEvent number: UInt) -> Bool { false }
 }
 
